@@ -1,5 +1,8 @@
 package org.example;
 
+import javax.swing.*;
+import java.awt.*;
+import java.awt.geom.Rectangle2D;
 import java.util.*;
 
 public class Board
@@ -37,18 +40,13 @@ public class Board
         return new int[]{x, y};
     }
 
-    // Explode and end gate
-    public void endGame()
-    {
-        System.out.println("Too bad, so sad.");
-    }
     // Chain reaction of tiles not adjacent to a mine
     public void chainReact (Tile tile)
     {
         // For each neighbour of the tile reveal it
         for ( Tile neighbour : getNeighbours( tile.getCoords() ) )
         {
-            tile.revealTile();
+            neighbour.revealTile();
         }
     }
 

@@ -28,6 +28,68 @@ public class GUI
         }
     }
 
+    public void endGame(Boolean isWon)
+    {
+        JFrame frame = new JFrame ();
+        JLabel message = new JLabel();
+        Graphics graphics;
+        // Check whether the game is won or lost and alter message depending
+        if ( isWon )
+        {
+            frame.setTitle("So fetch");
+            message.setText("Lukas will be delivering your victory cheque at 5P.M. ... maybe.");
+        }
+        else
+        {
+            frame.setTitle("It's okay babes, you tried");
+            message.setText("Too bad, so sad.");
+        }
+
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(300, 300);
+
+        GridBagLayout endGame = new GridBagLayout();
+        GridBagConstraints endGameConstraints = new GridBagConstraints();
+        frame.setLayout(endGame);
+
+        endGameConstraints.fill = GridBagConstraints.HORIZONTAL;
+
+        // Set constraints for message
+        message.setHorizontalAlignment(SwingConstants.CENTER);
+        endGameConstraints.weightx = 0.9;
+        endGameConstraints.gridx = 0;
+        endGameConstraints.gridy = 0;
+        endGameConstraints.gridwidth = 3;
+        endGame.setConstraints(message, endGameConstraints);
+        frame.add(message);
+
+        String restartText = "Restart";
+        JButton restartButton = new JButton(restartText);
+        String quitText = "Quit";
+        JButton quitButton = new JButton( quitText );
+
+        // Set constraints for restartButton
+        endGameConstraints.weightx = 0.5;
+        endGameConstraints.gridx = 0;
+        endGameConstraints.gridy = 1;
+        endGameConstraints.gridwidth = 1;
+        endGame.setConstraints(restartButton, endGameConstraints);
+        //Rectangle2D bounds =  graphics.getFontMetrics().getStringBounds(restartText, graphics);
+        // restartButton.setMaximumSize(bounds.getSize());
+        frame.add(restartButton);
+
+        // Set constraints for quitButton
+        endGameConstraints.weightx = 0.5;
+        endGameConstraints.gridx = 2;
+        endGameConstraints.gridy = 1;
+        endGameConstraints.gridwidth = 1;
+        endGame.setConstraints(quitButton, endGameConstraints);
+        frame.add(quitButton);
+
+
+        frame.setVisible(true);
+    }
+
     public GUI(Board board)
     {
         frame = new JFrame ("Minesweeper");

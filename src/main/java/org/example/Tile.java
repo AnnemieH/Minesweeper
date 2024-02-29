@@ -8,6 +8,9 @@ public class Tile
 {
     private boolean isRevealed = false;
     private boolean isActive = true;
+    // Has the user flagged this tile as beïng a mine?
+    private boolean isFlagged = false;
+    Icon flagIcon = new ImageIcon("src/main/resources/exclamation.png");
     Board board;
 
     // Both background and text colours should be black at the start
@@ -19,6 +22,7 @@ public class Tile
     private int contents = 0;
 
     private int[] coords = new int[2];
+    public JToggleButton tileButton = new JToggleButton();
 
     public void revealTile()
     {
@@ -29,11 +33,13 @@ public class Tile
         // Comment
         isRevealed = true;
         tileButton.setText(Integer.toString(contents));
-        tileButton.setEnabled(true);
+        tileButton.doClick(10);
+        //tileButton.setEnabled(true);
         // Check if it is a bomb and, if so, send a signal that the game is over
         if ( contents == -1 )
         {
-            board.endGame();
+            Main.endGame(false);
+           // board.endGame(false);
         }
         else if ( contents == 0 )
         {
@@ -46,7 +52,20 @@ public class Tile
         tileButton.setEnabled(false);
     }
 
-    public JToggleButton tileButton = new JToggleButton();
+
+    // Change whether the tile is flagged
+    public void changeFlag()
+    {
+        isFlagged = !isFlagged;
+        if( isFlagged )
+        {
+            tileButton.setIcon(flagIcon);
+        }
+        else
+        {
+            tileButton.setIcon(null);
+        }
+    }
 
     // SETTERS
     public void setMine()
@@ -62,7 +81,7 @@ public class Tile
 
     public void setCoords ( int[] coordinates )
     {
-        coords[0] = coordinates[1];
+        coords[0] = coordinates[0];
         coords[1] = coordinates[1];
     }
 
@@ -84,6 +103,7 @@ public class Tile
         this.board = board;
         this.coords = new int[2];
         this.coords = coords;
+
         //tileButton.setBackground(backgroundColour);
         //tileButton.setForeground(foregroundColour);
         // Add action listener to button
@@ -105,6 +125,7 @@ public class Tile
                 }
                 else if ( SwingUtilities.isRightMouseButton(e) )
                 {
+                    changeFlag();
                 }
             }
 
