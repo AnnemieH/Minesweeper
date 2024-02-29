@@ -26,6 +26,7 @@ public class Tile
         {
             return;
         }
+        // Comment
         isRevealed = true;
         tileButton.setText(Integer.toString(contents));
         tileButton.setEnabled(true);
@@ -92,7 +93,7 @@ public class Tile
             public void mouseClicked(MouseEvent e)
             {
                 // If tile has already been revealed do nothing
-                if ( isRevealed == true )
+                if ( isRevealed )
                 {
                     return;
                 }
@@ -101,11 +102,9 @@ public class Tile
                 if ( SwingUtilities.isLeftMouseButton(e) )
                 {
                     revealTile();
-                    System.out.println("LMB");
                 }
                 else if ( SwingUtilities.isRightMouseButton(e) )
                 {
-                    System.out.println("RMB");
                 }
             }
 
