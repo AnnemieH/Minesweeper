@@ -60,10 +60,12 @@ public class Tile
         if( isFlagged )
         {
             tileButton.setIcon(flagIcon);
+            board.mineFlagged();
         }
         else
         {
             tileButton.setIcon(null);
+            board.mineUnFlagged();
         }
     }
 
@@ -107,51 +109,53 @@ public class Tile
         //tileButton.setBackground(backgroundColour);
         //tileButton.setForeground(foregroundColour);
         // Add action listener to button
-        tileButton.addMouseListener(new MouseListener()
-        {
-            @Override
-            public void mouseClicked(MouseEvent e)
-            {
-                // If tile has already been revealed do nothing
-                if ( isRevealed )
-                {
-                    return;
-                }
-
-                // Differentiäte between left and right mouse clicks
-                if ( SwingUtilities.isLeftMouseButton(e) )
-                {
-                    revealTile();
-                }
-                else if ( SwingUtilities.isRightMouseButton(e) )
-                {
-                    changeFlag();
-                }
-            }
-
-            @Override
-            public void mouseReleased( MouseEvent e )
-            {
-
-            }
-
-            @Override
-            public void mousePressed( MouseEvent e )
-            {
-
-            }
-
-            @Override
-            public void mouseEntered( MouseEvent e )
-            {
-
-            }
-
-            @Override
-            public void mouseExited( MouseEvent e )
-            {
-
-            }
-        });
+        tileButton.addMouseListener(mouseClick);
     }
+
+    MouseListener mouseClick = new MouseListener()
+    {
+        @Override
+        public void mouseClicked(MouseEvent e)
+        {
+            // If tile has already been revealed do nothing
+            if ( isRevealed )
+            {
+                return;
+            }
+
+            // Differentiäte between left and right mouse clicks
+            if ( SwingUtilities.isLeftMouseButton(e) )
+            {
+                revealTile();
+            }
+            else if ( SwingUtilities.isRightMouseButton(e) )
+            {
+                changeFlag();
+            }
+        }
+
+        @Override
+        public void mousePressed(MouseEvent e)
+        {
+
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e)
+        {
+
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e)
+        {
+
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e)
+        {
+
+        }
+    };
 }

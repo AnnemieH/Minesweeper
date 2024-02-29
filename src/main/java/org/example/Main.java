@@ -5,7 +5,7 @@ public class Main
     private static Board board;
     private static GUI ui;
 
-    // Game has just bein
+    // Game has just begun
     public static void startGame()
     {
         // If game is already running, end it
@@ -22,6 +22,12 @@ public class Main
     public static void endGame(Boolean isWon)
     {
         ui.endGame( isWon );
+    }
+
+    // Tell the GUI if a bomb was flagged
+    public static void mineTotalUpdate(int minesRemaining)
+    {
+        GUI.updateMinesRemaining(minesRemaining);
     }
     // Quit the program
     public static void quit()

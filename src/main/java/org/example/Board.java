@@ -1,8 +1,5 @@
 package org.example;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.geom.Rectangle2D;
 import java.util.*;
 
 public class Board
@@ -48,6 +45,20 @@ public class Board
         {
             neighbour.revealTile();
         }
+    }
+
+    // A mine has been flagged
+    public void mineFlagged ()
+    {
+        --minesToFind;
+        Main.mineTotalUpdate(minesToFind);
+    }
+
+    // A mine has been unflagged
+    public void mineUnFlagged()
+    {
+        ++minesToFind;
+        Main.mineTotalUpdate(minesToFind);
     }
 
     // GETTERS
@@ -133,6 +144,7 @@ public class Board
 
         // Set minesToFind to be totalMines
         minesToFind = totalMines;
+        Main.mineTotalUpdate(minesToFind);
 
         // Keep an array of all the mines
         int[][] mineList = new int[minesToFind][2];

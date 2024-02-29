@@ -10,11 +10,13 @@ public class GUI
 {
     private JFrame frame = new JFrame ("Minesweeper");
     private JFrame gameEndFrame = new JFrame("");
-    private void createBoard(Board board)
+    private static JLabel minesRemaining = new JLabel("0");
+    private JPanel createBoard(Board board)
     {
+        JPanel boardPanel = new JPanel();
         int[] dimensions = new int[]{board.getDimensions()[0], board.getDimensions()[1]};
         // Create the grid of the same dimensions as the board
-        frame.setLayout(new GridLayout(dimensions[0], dimensions[1]));
+        boardPanel.setLayout(new GridLayout(dimensions[0], dimensions[1]));
 
         // Populate grid with buttons
         for (int i = 0;
@@ -26,10 +28,11 @@ public class GUI
                  ++j)
             {
                 Tile currTile = board.getTileAt(new int[]{i, j});
-                frame.add(currTile.tileButton);
-                frame.setVisible(true);
+                boardPanel.add(currTile.tileButton);
+                boardPanel.setVisible(true);
             }
         }
+        return boardPanel;
     }
 
     public void endGame(Boolean isWon)
@@ -106,6 +109,11 @@ public class GUI
         gameEndFrame.setVisible(true);
     }
 
+    public static void updateMinesRemaining ( int minesLeft )
+    {
+        minesRemaining.setText(Integer.toString(minesLeft));
+    }
+
 
     // CONSTRUCTORS
     public GUI(Board board)
@@ -114,8 +122,49 @@ public class GUI
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(800, 800);
         frame.setVisible(true);
+        GridBagLayout gameLayout = new GridBagLayout();
+        GridBagConstraints gameLayoutConstraints = new GridBagConstraints();
+        frame.setLayout(gameLayout);
+        gameLayoutConstraints.fill = GridBagConstraints.HORIZONTAL;
 
-        createBoard(board);
+        // Add mines remaining label
+        minesRemaining.setPreferredSize(new Dimension (100, 30 ));
+        minesRemaining.setHorizontalAlignment(SwingConstants.CENTER);
+        gameLayoutConstraints.weightx = 0.0;
+        gameLayoutConstraints.weighty = 0.1;
+        gameLayoutConstraints.gridx = 1;
+        gameLayoutConstraints.gridy = 0;
+        gameLayout.setConstraints(minesRemaining, gameLayoutConstraints);
+        frame.add(minesRemaining);
+
+        // Add spacers around the minesRemaining label
+        Box spacer = new Box(BoxLayout.X_AXIS);
+        spacer.setPreferredSize(new Dimension (300, 40));
+        gameLayoutConstraints.weightx = 0.9;
+        gameLayoutConstraints.gridx = 0;
+        gameLayoutConstraints.gridy = 0;
+        gameLayoutConstraints.gridwidth = 1;
+        gameLayout.setConstraints(spacer, gameLayoutConstraints);
+        gameEndFrame.add(spacer);
+        spacer = new Box(BoxLayout.X_AXIS);
+        gameLayoutConstraints.weightx = 0.9;
+        gameLayoutConstraints.gridx = 2;
+        gameLayoutConstraints.gridy = 0;
+        gameLayoutConstraints.gridwidth = 1;
+        gameLayout.setConstraints(spacer, gameLayoutConstraints);
+        gameEndFrame.add(spacer);
+
+
+        gameLayoutConstraints.fill = GridBagConstraints.BOTH;
+        // Add board
+        JPanel boardPanel = createBoard(board);
+        gameLayoutConstraints.weightx = 1.0;
+        gameLayoutConstraints.weighty = 0.9;
+        gameLayoutConstraints.gridx = 1;
+        gameLayoutConstraints.gridy = 1;
+        gameLayoutConstraints.gridwidth = 3;
+        gameLayout.setConstraints(boardPanel, gameLayoutConstraints);
+        frame.add(boardPanel);
     }
 
     // DESTRUCTORS
