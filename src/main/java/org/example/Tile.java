@@ -35,28 +35,28 @@ public class Tile
 
     private void textColour()
     {
-        //CellStyle
         switch (contents)
         {
             case 0:
-                tileButton.setForeground(Color.GRAY);
+                tileButton.setBackground(Color.GRAY);
             case 1:
-                tileButton.setForeground(Color.MAGENTA);
+                tileButton.setBackground(Color.MAGENTA);
             case 2:
-                tileButton.setForeground(Color.BLUE);
+                tileButton.setBackground(Color.BLUE);
             case 3:
-                tileButton.setForeground(Color.RED);
+                tileButton.setBackground(Color.RED);
             case 4:
-                tileButton.setForeground(Color.PINK);
+                tileButton.setBackground(Color.PINK);
             case 5:
-                tileButton.setForeground(Color.CYAN);
+                tileButton.setBackground(Color.CYAN);
             case 6:
-                tileButton.setForeground(Color.YELLOW);
+                tileButton.setBackground(Color.YELLOW);
             case 7:
-                tileButton.setForeground(Color.GREEN);
+                tileButton.setBackground(Color.GREEN);
             case 8:
-                tileButton.setForeground(Color.ORANGE);
+                tileButton.setBackground(Color.ORANGE);
             default:
+                tileButton.setBackground(Color.BLACK);
         }
     }
 
@@ -93,7 +93,7 @@ public class Tile
             board.safeTileRevealed();
         }
 
-        textColour();
+        //textColour();
         // Repress the button before disabling it to fix graphics
         tileButton.doClick(1);
         tileButton.setEnabled(false);

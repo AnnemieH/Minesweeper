@@ -1,7 +1,6 @@
 package org.example;
 import javax.swing.*;
 import java.awt.*;
-import java.applet.Applet;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
@@ -14,7 +13,7 @@ public class GUI
     private JPanel createBoard(Board board)
     {
         JPanel boardPanel = new JPanel();
-        int[] dimensions = new int[]{board.getDimensions()[0], board.getDimensions()[1]};
+        int[] dimensions = new int[]{board.getBoundingBox()[0], board.getBoundingBox()[1]};
         // Create the grid of the same dimensions as the board
         boardPanel.setLayout(new GridLayout(dimensions[0], dimensions[1]));
 

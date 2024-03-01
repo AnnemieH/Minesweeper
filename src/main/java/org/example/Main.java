@@ -70,7 +70,7 @@ public class Main
             System.out.println("File not found");
         }
 
-        return new Board(boardShape, 400);
+        return new Board(boardShape, 70);
     }
 
     // Quit the program
@@ -81,6 +81,7 @@ public class Main
 
     public static void main(String[] args)
     {
-        startGame();
+        MainMenu menu  = new MainMenu();
+        //startGame();
     }
 }

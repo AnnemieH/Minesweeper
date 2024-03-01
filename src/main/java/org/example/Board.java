@@ -14,7 +14,7 @@ public class Board
     private int remainingSafeTiles = 0;
 
     // dimensions stores x and y sizes
-    private int[] dimensions = new int[2];
+    private int[] boundingBox = new int[2];
 
     // Store the shape of a board with 'x' for an active tile and 'o' (or anything else) for an inactive tile
     private LinkedList<LinkedList<String>> boardShape;
@@ -25,11 +25,11 @@ public class Board
 
         // Iterate through boardshape and count the number of non-active tiles
         for ( int i = 0;
-              i < dimensions[0];
+              i < boundingBox[0];
               ++i )
         {
             for ( int j = 0;
-                  j < dimensions[1];
+                  j < boundingBox[1];
                   ++j )
             {
                 if ( !boardShape.get(i).get(j).equals("x"))
@@ -47,12 +47,12 @@ public class Board
     private int coordsToIndex(int[] coords)
     {
         // Check if coördinates are out-of-bounds
-        if (coords[0] < 0 || coords[0] >= dimensions[0] || coords[1] < 0 || coords[1] >= dimensions[1])
+        if (coords[0] < 0 || coords[0] >= boundingBox[0] || coords[1] < 0 || coords[1] >= boundingBox[1])
         {
             return -1;
         }
         // The first 0, 1, ..., x-1 tiles will be with y = 0, the next x, x+1, ..., 2x - 1 will be y = 2 etc.
-        return coords[1] * dimensions[0] + coords[0];
+        return coords[1] * boundingBox[0] + coords[0];
     }
 
     // Given an index, return the coördinates they correspond to in this board, otherwise return [-1, -1]
@@ -63,8 +63,8 @@ public class Board
             return new int[]{-1, -1};
         }
         // The first 0, 1, ..., x-1 tiles will be with y = 0, the next x, x+1, ..., 2x - 1 will be y = 2 etc.
-        int x = index % (dimensions[0]);
-        int y = index / (dimensions[0]);
+        int x = index % (boundingBox[0]);
+        int y = index / (boundingBox[0]);
         return new int[]{x, y};
     }
 
@@ -132,9 +132,9 @@ public class Board
     {
         return contents[coordsToIndex(coords)];
     }
-    public int[] getDimensions()
+    public int[] getBoundingBox()
     {
-        return dimensions;
+        return boundingBox;
     }
 
     public int size()
@@ -239,7 +239,7 @@ public class Board
         Random rand = new Random();
 
         // Fill the board with tiles
-        contents = new Tile[dimensions[0] * dimensions[1]];
+        contents = new Tile[boundingBox[0] * boundingBox[1]];
 
         // Recalculate totalMines now that everything's initialised
         totalMines = Math.min(totalMines, countActiveTiles() - 1);
@@ -264,8 +264,8 @@ public class Board
                 totalMines = i - 1;
                 break;
             }
-            int mineX = rand.nextInt(dimensions[0]);
-            int mineY = rand.nextInt(dimensions[1]);
+            int mineX = rand.nextInt(boundingBox[0]);
+            int mineY = rand.nextInt(boundingBox[1]);
 
 
             // Store these coördinates in an array
@@ -372,8 +372,8 @@ public class Board
                 break;
             }
 
-            int mineX = rand.nextInt(dimensions[0]);
-            int mineY = rand.nextInt(dimensions[1]);
+            int mineX = rand.nextInt(boundingBox[0]);
+            int mineY = rand.nextInt(boundingBox[1]);
 
 
             // Store these coördinates in an array
@@ -459,8 +459,8 @@ public class Board
     public Board(int x, int y, int totalMines)
     {
         // Set dimensions to be x and y
-        dimensions[0] = x;
-        dimensions[1] = y;
+        boundingBox[0] = x;
+        boundingBox[1] = y;
 
         this.totalMines = totalMines;
 
@@ -470,13 +470,13 @@ public class Board
 
         // Create a default boardShape
         for ( int i = 0;
-              i < dimensions[0];
+              i < boundingBox[0];
               ++i )
         {
             // For each column in the current row, an 'x' to mark an available space
             LinkedList<String> currRow = new LinkedList<>();
             for ( int j = 0;
-                  j < dimensions[1];
+                  j < boundingBox[1];
                   ++j )
             {
                 currRow.add("x");
@@ -508,8 +508,8 @@ public class Board
         }
 
         // Values are off-by-one so fix and set dimensions to be this
-        dimensions[0] = maxX - 1;
-        dimensions[1] = maxY - 1;
+        boundingBox[0] = maxX - 1;
+        boundingBox[1] = maxY - 1;
 
         initBoard();
     }
