@@ -5,11 +5,16 @@ import java.util.*;
 public class Board
 {
     private Tile[] contents = new Tile[10];
+    // Keep track of how many mines remaining the player thinks there is
     private int minesToFind = 0;
+    // How many tiles can the player click on without exploding
+    private int remainingSafeTiles = 0;
 
     // dimensions stores x and y sizes
     private int[] dimensions = new int[2];
-    private Boolean[] boardShape;
+
+    // Store the shape of a board with 'x' for an active tile and 'o' (or anything else) for an inactive tile
+    private LinkedList<LinkedList<String>> boardShape;
 
     // Given a pair of coördinates, return the index they correspond to in this board.
     // If coördinates are not present on the board, return -1
@@ -35,6 +40,16 @@ public class Board
         int x = index % (dimensions[0]);
         int y = index / (dimensions[0]);
         return new int[]{x, y};
+    }
+
+    // If a tile has been revealed, update remainingSafeTiles and maybe win
+    public void safeTileRevealed()
+    {
+        --remainingSafeTiles;
+        if ( remainingSafeTiles <= 0 )
+        {
+            Main.endGame(true);
+        }
     }
 
     // Chain reaction of tiles not adjacent to a mine
@@ -76,6 +91,24 @@ public class Board
         return contents.length;
     }
 
+    // Initialise remaining tiles
+    private void initRemainingSafeTiles ()
+    {
+        int safeTiles = 0;
+
+        // Count up active tiles
+        for ( Tile tile : contents )
+        {
+            if ( tile.isActive() )
+            {
+                ++safeTiles;
+            }
+        }
+
+        // Subtract all the mines and set this equal to remainingSafeTiles
+        remainingSafeTiles = safeTiles - minesToFind;
+    }
+
     // Sum two arrays pairwise until one runs out of length
     private int[] pairwiseSum(int[] array1, int[] array2)
     {
@@ -110,10 +143,11 @@ public class Board
         indexArray[7] = coordsToIndex(pairwiseSum(pairwiseSum(coords, xNegPeturbation), yNegPeturbation));
 
         int arrayLength = 0;
-        // Count the non-negative indices
+        // Count the indices in bounds
         for ( int index : indexArray )
         {
-            if ( index != -1 )
+
+            if ( index >= 0 && index < contents.length && isInBounds(indexToCoords(index)) )
             {
                 ++arrayLength;
             }
@@ -122,19 +156,28 @@ public class Board
         // Create an array of size arrayLength
         Tile[] neighbours = new Tile[arrayLength];
 
-        // Add the tiles at non-negative indices to this array
+        // Add the tiles at non-negative in-bounds indices to this array
         int neighboursSize = 0;
         for ( int index : indexArray )
         {
-            if ( index != -1 )
+            if ( index >= 0 && isInBounds(indexToCoords(index))  )
             {
-                neighbours[neighboursSize] = getTileAt(indexToCoords(index));
+                Tile possNeighbour = getTileAt(indexToCoords(index));
+                neighbours[neighboursSize] = possNeighbour;
                 ++neighboursSize;
+
             }
         }
 
         return neighbours;
     }
+
+    // Is given coördinates in bounds of the map
+    private Boolean isInBounds(int[] coords)
+    {
+        return (boardShape.get(coords[1])).get(coords[0]).equals("x");
+    }
+
     // CONSTRUCTORS
     public Board(int x, int y, int totalMines)
     {
@@ -222,5 +265,129 @@ public class Board
                 currMine.setContents(adjMines);
             }
         }
+
+        // Initialise tiles to find
+        initRemainingSafeTiles();
+
+    }
+
+    public Board( LinkedList<LinkedList<String>> boardShape, int totalMines)
+    {
+        minesToFind = totalMines;
+        Main.mineTotalUpdate(minesToFind);
+        this.boardShape = boardShape;
+
+        // Find the size of the board
+        int maxX = 0;
+        int maxY = boardShape.size();
+        for( List<String> line : boardShape )
+        {
+            if ( line.size() > maxX )
+            {
+                maxX = line.size();
+            }
+        }
+
+        // Values are off-by-one so fix and set dimensions to be this
+        dimensions[0] = maxX - 1;
+        dimensions[1] = maxY - 1;
+
+        // Keep an array of all the mines
+        int[][] mineList = new int[minesToFind][2];
+
+        // Uniformly at random allocate the mines
+        Random rand = new Random();
+
+        mineGen:
+        for (int i = 0;
+             i < totalMines;
+             i++)
+        {
+            int mineX = rand.nextInt(dimensions[0]);
+            int mineY = rand.nextInt(dimensions[1]);
+
+
+            // Store these coördinates in an array
+            int[] mineLocation = {mineX, mineY};
+
+            // Check to see if we've already mined this spot
+            // If not, then repeat this loops
+            for( int[] mine : mineList)
+            {
+                if (mineLocation == mine)
+                {
+                    --i;
+                    continue mineGen;
+                }
+            }
+
+            // Check to see if we're in-bounds.
+            // If not, then repeat this loops
+            if ( !isInBounds(mineLocation))
+            {
+                --i;
+                continue;
+            }
+            mineList[i] = mineLocation;
+        }
+        // Fill the board with tiles
+        contents = new Tile[dimensions[0] * dimensions[1]];
+        for ( int i = 0;
+              i < contents.length;
+              ++i )
+        {
+            contents[i] = new Tile(this, indexToCoords(i));
+        }
+        // Set the chosen tiles to be mines
+        for( int[] mine : mineList )
+        {
+            int index = coordsToIndex(mine);
+            if ( index == -1 )
+            {
+                System.out.println("Error in board construction");
+            }
+
+            contents[index].setMine();
+        }
+
+        // Assign remaining tiles
+        for (int i = 0;
+             i < contents.length;
+             ++i )
+        {
+            Tile currMine = contents[i];
+            currMine.setCoords(indexToCoords(i));
+            // Count adjacent mines
+            int adjMines = 0;
+            // Get the tiles neighbours and iterate through them
+
+            Tile[] neighbours = getNeighbours(indexToCoords(i));
+
+
+            // For each neighbour that is a mine, increment adjMines
+            for ( int j = 0;
+                  j < neighbours.length;
+                  ++j )
+            {
+                if ( neighbours[j].getContents() == -1 )
+                {
+                    ++adjMines;
+                }
+            }
+
+            // Set mine.contents to be adjMines unless it is a mine
+            if ( currMine.getContents() != -1 )
+            {
+                currMine.setContents(adjMines);
+            }
+
+            // If this index is out-of-bounds, ignore it
+            if ( !isInBounds(indexToCoords(i)))
+            {
+                getTileAt(indexToCoords(i)).deActivate();
+            }
+        }
+        // Initialise tiles to find
+        initRemainingSafeTiles();
     }
 }

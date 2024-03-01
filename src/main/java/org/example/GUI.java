@@ -43,7 +43,7 @@ public class GUI
         if ( isWon )
         {
             gameEndFrame.setTitle("So fetch");
-            message.setText("Lukas will be delivering your victory cheque at 5P.M. ... maybe.");
+            message.setText("Lukas will be delivering your victory post-it at 5P.M. ... maybe.");
         }
         else
         {

@@ -26,7 +26,12 @@ public class Tile
 
     public void revealTile()
     {
-        if ( isRevealed == true )
+        // If the tile has already been revealed or is inactive, do not reveal it
+        if ( isRevealed == true)
+        {
+            return;
+        }
+        else if ( isActive == false )
         {
             return;
         }
@@ -43,15 +48,27 @@ public class Tile
         }
         else if ( contents == 0 )
         {
+            // Report to board that a safe tile was clicked
+            board.safeTileRevealed();
             // Explode out tiles
             board.chainReact(this);
         }
-
-
+        else
+        {
+            // Report to board that a safe tile was clicked
+            board.safeTileRevealed();
+        }
 
         tileButton.setEnabled(false);
     }
 
+    public void deActivate()
+    {
+        isActive = false;
+        tileButton.setText(null);
+        tileButton.setEnabled(false);
+        isRevealed = true;
+    }
 
     // Change whether the tile is flagged
     public void changeFlag()
@@ -77,7 +94,10 @@ public class Tile
 
     public void setContents(int contents)
     {
-        this.contents = contents;
+        if(isActive == true)
+        {
+            this.contents = contents;
+        }
         //tileButton.setText(Integer.toString(this.contents));
     }
 
@@ -97,6 +117,11 @@ public class Tile
     public int[] getCoords()
     {
         return coords;
+    }
+
+    public boolean isActive()
+    {
+        return isActive;
     }
 
     // CONSTRUCTORS
