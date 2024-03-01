@@ -1,5 +1,5 @@
 package org.example;
-import java.awt.Color;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import javax.swing.*;
@@ -21,8 +21,44 @@ public class Tile
     // otherwise contents equals the number of mines adjacent to the tile
     private int contents = 0;
 
+    // Reset this button
+    public void reset()
+    {
+        contents = 0;
+        tileButton.setText(null);
+        //tileButton.setSelected(false);
+        isRevealed = false;
+    }
+
     private int[] coords = new int[2];
     public JToggleButton tileButton = new JToggleButton();
+
+    private void textColour()
+    {
+        //CellStyle
+        switch (contents)
+        {
+            case 0:
+                tileButton.setForeground(Color.GRAY);
+            case 1:
+                tileButton.setForeground(Color.MAGENTA);
+            case 2:
+                tileButton.setForeground(Color.BLUE);
+            case 3:
+                tileButton.setForeground(Color.RED);
+            case 4:
+                tileButton.setForeground(Color.PINK);
+            case 5:
+                tileButton.setForeground(Color.CYAN);
+            case 6:
+                tileButton.setForeground(Color.YELLOW);
+            case 7:
+                tileButton.setForeground(Color.GREEN);
+            case 8:
+                tileButton.setForeground(Color.ORANGE);
+            default:
+        }
+    }
 
     public void revealTile()
     {
@@ -35,7 +71,6 @@ public class Tile
         {
             return;
         }
-        // Comment
         isRevealed = true;
         tileButton.setText(Integer.toString(contents));
         tileButton.doClick(10);
@@ -43,8 +78,7 @@ public class Tile
         // Check if it is a bomb and, if so, send a signal that the game is over
         if ( contents == -1 )
         {
-            Main.endGame(false);
-           // board.endGame(false);
+            board.boom(this);
         }
         else if ( contents == 0 )
         {
@@ -53,12 +87,15 @@ public class Tile
             // Explode out tiles
             board.chainReact(this);
         }
-        else
+        else if ( contents >= 1 )
         {
             // Report to board that a safe tile was clicked
             board.safeTileRevealed();
         }
 
+        textColour();
+        // Repress the button before disabling it to fix graphics
+        tileButton.doClick(1);
         tileButton.setEnabled(false);
     }
 
@@ -67,7 +104,13 @@ public class Tile
         isActive = false;
         tileButton.setText(null);
         tileButton.setEnabled(false);
+        tileButton.setBackground(Color.BLACK);
         isRevealed = true;
+    }
+
+    public void click()
+    {
+        tileButton.doClick(1);
     }
 
     // Change whether the tile is flagged
@@ -130,6 +173,8 @@ public class Tile
         this.board = board;
         this.coords = new int[2];
         this.coords = coords;
+
+        tileButton.setFont(new Font("SansSerif", Font.PLAIN, 11));
 
         //tileButton.setBackground(backgroundColour);
         //tileButton.setForeground(foregroundColour);

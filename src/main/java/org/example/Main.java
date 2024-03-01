@@ -3,7 +3,6 @@ package org.example;
 import java.io.FileNotFoundException;
 import java.util.*;
 import java.io.File;
-import java.awt.*;
 
 public class Main
 {
@@ -71,7 +70,7 @@ public class Main
             System.out.println("File not found");
         }
 
-        return new Board(boardShape, 1);
+        return new Board(boardShape, 400);
     }
 
     // Quit the program
