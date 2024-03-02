@@ -20,28 +20,23 @@ public class Board
 
     // Store the shape of a board with 'x' for an active tile and 'o' (or anything else) for an inactive tile
     private LinkedList<LinkedList<String>> boardShape;
+    private String[] boardForm;
 
     private int countActiveTiles ()
     {
-        int inactive = 0;
+        int active = 0;
 
-        // Iterate through boardshape and count the number of non-active tiles
-        for ( int i = 0;
-              i < boundingBox[0];
-              ++i )
+        // Iterate through boardshape and count the number of active tiles
+        for ( String tile : boardForm )
         {
-            for ( int j = 0;
-                  j < boundingBox[1];
-                  ++j )
+            if ( tile.equals("x") )
             {
-                if ( !boardShape.get(i).get(j).equals("x"))
-                {
-                    ++inactive;
-                }
+                ++active;
             }
         }
 
-        return contents.length - inactive;
+
+        return active;
     }
 
     // Given an array of coördinates, return the index they correspond to in this board.
@@ -119,7 +114,7 @@ public class Board
 
     // Given an index, return the coördinates they correspond to in this board, otherwise return [-1, -1]
     private int[] indexToCoords(int index)
-    {
+     {
 
         // Create an array of size boardDimensions to store our coordinates in
         int[] coords = new int[boardDimensions];
@@ -221,6 +216,16 @@ public class Board
     public int[] getBoundingBox()
     {
         return boundingBox;
+    }
+    private int boundingProd()
+    {
+        int temp = 1;
+        for ( int bound : boundingBox )
+        {
+            temp *= bound;
+        }
+
+        return temp;
     }
 
     public int size()
@@ -359,7 +364,7 @@ public class Board
     // Is given coördinates in bounds of the map
     private Boolean isInBounds(int[] coords)
     {
-        return (boardShape.get(coords[1])).get(coords[0]).equals("x");
+        return (boardForm[coordsToIndex(coords)]).equals("x");
     }
 
     // Initialise the board with tiles
@@ -371,8 +376,16 @@ public class Board
         // Uniformly at random allocate the mines
         Random rand = new Random();
 
+        int size = 1;
+
         // Fill the board with tiles
-        contents = new Tile[boundingBox[0] * boundingBox[1]];
+        for ( int i = 0;
+              i < boardDimensions;
+              ++i )
+        {
+            size *= boundingBox[i];
+        }
+        contents = new Tile[size];
 
         // Recalculate totalMines now that everything's initialised
         totalMines = Math.min(totalMines, countActiveTiles() - 1);
@@ -397,12 +410,15 @@ public class Board
                 totalMines = i - 1;
                 break;
             }
-            int mineX = rand.nextInt(boundingBox[0]);
-            int mineY = rand.nextInt(boundingBox[1]);
 
+            int[] mineLocation = new int[boardDimensions];
 
-            // Store these coördinates in an array
-            int[] mineLocation = {mineX, mineY};
+            for ( int j = 0;
+                  j < boardDimensions;
+                  ++j )
+            {
+                mineLocation[j] = rand.nextInt(boundingBox[j]);
+            }
 
             // Check to see if we've already mined this spot
             // If not, then repeat this loops
@@ -505,12 +521,14 @@ public class Board
                 break;
             }
 
-            int mineX = rand.nextInt(boundingBox[0]);
-            int mineY = rand.nextInt(boundingBox[1]);
+            int[] mineLocation = new int[boardDimensions];
 
-
-            // Store these coördinates in an array
-            int[] mineLocation = {mineX, mineY};
+            for ( int j = 0;
+                  j < boardDimensions;
+                  ++j )
+            {
+                mineLocation[j] = rand.nextInt(boundingBox[j]);
+            }
 
             // Check to see if we've already mined this spot
             // If not, then repeat this loops
@@ -588,12 +606,27 @@ public class Board
         gameStarted = false;
     }
 
+    // Create a board filled with available spaces of the correct dimension and bounds
+    private String[] genDefaultBoard()
+    {
+        int length = 1;
+        // Generate an array of size equal to the product of boundingBox
+        for ( int dim : boundingBox )
+        {
+            length *= dim;
+        }
+
+        // return an array of size length and fill it with 'x'
+        String[] defaultBoard = new String[length];
+        Arrays.fill(defaultBoard, "x");
+        return defaultBoard;
+    }
+
     // CONSTRUCTORS
-    public Board(int x, int y, int totalMines)
+    public Board(int[] dimParam, int totalMines)
     {
         // Set dimensions to be x and y
-        boundingBox[0] = x;
-        boundingBox[1] = y;
+        boundingBox = dimParam;
 
         this.totalMines = totalMines;
 
@@ -601,48 +634,37 @@ public class Board
         minesToFind = totalMines;
         Main.mineTotalUpdate(minesToFind);
 
-        // Create a default boardShape
-        for ( int i = 0;
-              i < boundingBox[0];
-              ++i )
-        {
-            // For each column in the current row, an 'x' to mark an available space
-            LinkedList<String> currRow = new LinkedList<>();
-            for ( int j = 0;
-                  j < boundingBox[1];
-                  ++j )
-            {
-                currRow.add("x");
-            }
-
-            // Add currRow to our board
-            boardShape.add(currRow);
-        }
+        boardForm = genDefaultBoard();
 
         initBoard();
     }
 
-    public Board( LinkedList<LinkedList<String>> boardShape, int totalMines)
+    public Board( LinkedList<LinkedList<String>> boardShape, LinkedList<String> dataLine, int totalMines)
     {
         minesToFind = totalMines;
         Main.mineTotalUpdate(minesToFind);
-        this.boardShape = boardShape;
         this.totalMines = totalMines;
 
-        // Find the size of the board
-        int maxX = 0;
-        int maxY = boardShape.size();
-        for( List<String> line : boardShape )
+        // dataLine contains boundingBox so set that
+        for ( int i = 0;
+              i < dataLine.size();
+              ++i )
         {
-            if ( line.size() > maxX )
-            {
-                maxX = line.size();
-            }
+            boundingBox[i] = Integer.parseInt(dataLine.get(i));
         }
 
-        // Values are off-by-one so fix and set dimensions to be this
-        boundingBox[0] = maxX - 1;
-        boundingBox[1] = maxY - 1;
+        // Unpack boardShape and turn into an array
+        String[] boardArray = new String[boundingProd()];
+        for ( int i = 0;
+              i < boardShape.size();
+              ++i )
+        {
+            String[] tempArray = new String[boardShape.size()];
+            boardShape.get(i).toArray(tempArray);
+            System.arraycopy(tempArray,0, boardArray, i * boundingBox[0], tempArray.length);
+        }
+
+        boardForm = boardArray;
 
         initBoard();
     }

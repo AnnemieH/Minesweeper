@@ -57,9 +57,13 @@ public class Main
     // Load a board from a file
     public static Board loadBoard()
     {
+        // Read the csv into board shape, reserving the first line for data
         LinkedList<LinkedList<String>> boardShape = new LinkedList<LinkedList<String>>();
+        LinkedList<String> dataLine = new LinkedList<>();
         try( Scanner scanner = new Scanner(new File("src/main/resources/mineMap.csv")))
         {
+            dataLine = breakCSVLine(scanner.nextLine());
+
             while( scanner.hasNextLine() )
             {
                 boardShape.add(breakCSVLine(scanner.nextLine()));
@@ -70,7 +74,7 @@ public class Main
             System.out.println("File not found");
         }
 
-        return new Board(boardShape, 70);
+        return new Board(boardShape, dataLine, 70);
     }
 
     // Quit the program
@@ -82,6 +86,5 @@ public class Main
     public static void main(String[] args)
     {
         MainMenu menu  = new MainMenu();
-        //startGame();
     }
 }
