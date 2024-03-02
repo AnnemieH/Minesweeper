@@ -3,6 +3,7 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import javax.swing.*;
+import javax.swing.border.Border;
 
 public class Tile
 {
@@ -175,6 +176,9 @@ public class Tile
         this.coords = coords;
 
         tileButton.setFont(new Font("SansSerif", Font.PLAIN, 11));
+        Border tileBorder = BorderFactory.createLineBorder(Color.BLACK, 1);
+        tileButton.setBorder(tileBorder);
+        tileButton.setBackground(Color.white);
 
         //tileButton.setBackground(backgroundColour);
         //tileButton.setForeground(foregroundColour);
@@ -197,6 +201,12 @@ public class Tile
             if ( SwingUtilities.isLeftMouseButton(e) )
             {
                 revealTile();
+
+                Object caller = e.getSource();
+                if( caller instanceof JToggleButton )
+                {
+                    ((JToggleButton) caller).setSelected(false);
+                }
             }
             else if ( SwingUtilities.isRightMouseButton(e) )
             {

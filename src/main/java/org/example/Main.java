@@ -7,6 +7,7 @@ import java.io.File;
 public class Main
 {
     private static Board board;
+    private static File currMap;
     private static GUI ui;
 
     // Game has just begun
@@ -19,9 +20,36 @@ public class Main
         }
         // Instantiäte variäbles
         //board = new Board(16, 16, 40);
-        board = loadBoard();
+        board = loadBoard(currMap);
         ui = new GUI(board);
 
+    }
+    // Start the game from a given map
+    public static void startGame(File map)
+    {
+        currMap = map;
+        // If game is already running, end it
+        if ( board != null )
+        {
+            ui.close();
+        }
+        // Instantiäte variäbles
+        //board = new Board(16, 16, 40);
+        board = loadBoard(map);
+        ui = new GUI(board);
+
+    }
+
+    public static void startGame ( int[] boundingBox, int mines )
+    {
+        // If game is already running, end it
+        if ( board != null )
+        {
+            ui.close();
+        }
+        // Instantiäte variäbles
+        board = new Board(boundingBox, mines);
+        ui = new GUI(board);
     }
     // Game is over
     public static void endGame(Boolean isWon)
@@ -55,12 +83,12 @@ public class Main
     }
 
     // Load a board from a file
-    public static Board loadBoard()
+    public static Board loadBoard(File map)
     {
         // Read the csv into board shape, reserving the first line for data
         LinkedList<LinkedList<String>> boardShape = new LinkedList<LinkedList<String>>();
         LinkedList<String> dataLine = new LinkedList<>();
-        try( Scanner scanner = new Scanner(new File("src/main/resources/mineMap.csv")))
+        try( Scanner scanner = new Scanner(map))
         {
             dataLine = breakCSVLine(scanner.nextLine());
 

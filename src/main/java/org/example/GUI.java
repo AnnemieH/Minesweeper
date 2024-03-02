@@ -1,4 +1,5 @@
 package org.example;
+import javax.lang.model.util.Elements;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -119,51 +120,30 @@ public class GUI
     {
         frame = new JFrame ("Minesweeper");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(800, 800);
         frame.setVisible(true);
-        GridBagLayout gameLayout = new GridBagLayout();
-        GridBagConstraints gameLayoutConstraints = new GridBagConstraints();
-        frame.setLayout(gameLayout);
-        gameLayoutConstraints.fill = GridBagConstraints.HORIZONTAL;
 
         // Add mines remaining label
         minesRemaining.setPreferredSize(new Dimension (100, 30 ));
         minesRemaining.setHorizontalAlignment(SwingConstants.CENTER);
-        gameLayoutConstraints.weightx = 0.0;
-        gameLayoutConstraints.weighty = 0.1;
-        gameLayoutConstraints.gridx = 1;
-        gameLayoutConstraints.gridy = 0;
-        gameLayout.setConstraints(minesRemaining, gameLayoutConstraints);
-        frame.add(minesRemaining);
 
-        // Add spacers around the minesRemaining label
-        Box spacer = new Box(BoxLayout.X_AXIS);
-        spacer.setPreferredSize(new Dimension (300, 40));
-        gameLayoutConstraints.weightx = 0.9;
-        gameLayoutConstraints.gridx = 0;
-        gameLayoutConstraints.gridy = 0;
-        gameLayoutConstraints.gridwidth = 1;
-        gameLayout.setConstraints(spacer, gameLayoutConstraints);
-        gameEndFrame.add(spacer);
-        spacer = new Box(BoxLayout.X_AXIS);
-        gameLayoutConstraints.weightx = 0.9;
-        gameLayoutConstraints.gridx = 2;
-        gameLayoutConstraints.gridy = 0;
-        gameLayoutConstraints.gridwidth = 1;
-        gameLayout.setConstraints(spacer, gameLayoutConstraints);
-        gameEndFrame.add(spacer);
-
-
-        gameLayoutConstraints.fill = GridBagConstraints.BOTH;
         // Add board
         JPanel boardPanel = createBoard(board);
-        gameLayoutConstraints.weightx = 1.0;
-        gameLayoutConstraints.weighty = 0.9;
-        gameLayoutConstraints.gridx = 1;
-        gameLayoutConstraints.gridy = 1;
-        gameLayoutConstraints.gridwidth = 3;
-        gameLayout.setConstraints(boardPanel, gameLayoutConstraints);
-        frame.add(boardPanel);
+
+
+        JPanel gamePanel = new JPanel();
+
+        GroupLayout gameLayout = new GroupLayout(gamePanel);
+        gameLayout.setHorizontalGroup(gameLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
+                                              .addComponent(minesRemaining)
+                                              .addComponent(boardPanel)
+                                     );
+        gameLayout.setVerticalGroup(gameLayout.createSequentialGroup()
+                                            .addComponent(minesRemaining)
+                                            .addComponent(boardPanel)
+                                   );
+        gamePanel.setLayout(gameLayout);
+        frame.add(gamePanel);
+        frame.setSize(new Dimension(800, 800));
     }
 
     // DESTRUCTORS
