@@ -27,6 +27,7 @@ public class Tile
     {
         contents = 0;
         tileButton.setText(null);
+        tileButton.setBackground(Color.gray);
         //tileButton.setSelected(false);
         isRevealed = false;
     }
@@ -73,6 +74,7 @@ public class Tile
             return;
         }
         isRevealed = true;
+        tileButton.setBackground(Color.white);
         tileButton.setText(Integer.toString(contents));
         tileButton.doClick(10);
         //tileButton.setEnabled(true);
@@ -178,7 +180,8 @@ public class Tile
         tileButton.setFont(new Font("SansSerif", Font.PLAIN, 11));
         Border tileBorder = BorderFactory.createLineBorder(Color.BLACK, 1);
         tileButton.setBorder(tileBorder);
-        tileButton.setBackground(Color.white);
+        tileButton.setBackground(Color.gray);
+        tileButton.setVisible(true);
 
         //tileButton.setBackground(backgroundColour);
         //tileButton.setForeground(foregroundColour);

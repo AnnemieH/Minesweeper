@@ -41,7 +41,7 @@ public class Board
 
     // Given an array of coördinates, return the index they correspond to in this board.
     // If coördinates are not present on the board, return -1
-    private int coordsToIndex(int[] coords)
+    public int coordsToIndex(int[] coords)
     {
         // If coords is empty, return 0
         if ( coords.length == 0 )
@@ -57,20 +57,24 @@ public class Board
         // Remove the first element from coords for recursion and store in strippedCoords
         int[] strippedCoords = new int[coords.length - 1];
 
-        for ( int i : strippedCoords )
+        for (  int i = 0;
+               i < strippedCoords.length;
+               ++i )
         {
             strippedCoords[i] = coords[i + 1];
         }
 
         // Remove the first element from BoundingBox for recursion
         int[] strippedBoundingBox = new int[boundingBox.length - 1];
-        for ( int i : strippedBoundingBox )
+        for (  int i = 0;
+               i < strippedBoundingBox.length;
+               ++i )
         {
             strippedBoundingBox[i] = boundingBox[i + 1];
         }
 
         // Return the appropriate index value, making sure that if it's negative, we set it to -1
-        return Math.max(coords[0] + (boundingBox[0] * coordsToIndex(strippedCoords)), -1);
+        return Math.max(coords[0] + (boundingBox[0] * coordsToIndex(strippedCoords, strippedBoundingBox)), -1);
 /*
         // Check if coördinates are out-of-bounds
         if (coords[0] < 0 || coords[0] >= boundingBox[0] || coords[1] < 0 || coords[1] >= boundingBox[1])
@@ -89,21 +93,25 @@ public class Board
         }
 
         // If coords[0] is out of bounds, return -1
-        if ( coords[0] < 0 || coords[0] >= boundingBox[0] )
+        if ( coords[0] < 0 || coords[0] >= remBoundingBox[0] )
         {
             return -1;
         }
         // Remove the first element from coords for recursion and store in strippedCoords
         int[] strippedCoords = new int[coords.length - 1];
 
-        for ( int i : strippedCoords )
+        for ( int i = 0;
+              i < strippedCoords.length;
+              ++i )
         {
             strippedCoords[i] = coords[i + 1];
         }
 
         // Remove the first element from remBoundingBox for recursion
         int[] strippedBoundingBox = new int[remBoundingBox.length - 1];
-        for ( int i : strippedBoundingBox )
+        for ( int i = 0;
+              i < strippedBoundingBox.length;
+              ++i )
         {
                 strippedBoundingBox[i] = remBoundingBox[i + 1];
         }
@@ -113,7 +121,7 @@ public class Board
     }
 
     // Given an index, return the coördinates they correspond to in this board, otherwise return [-1, -1]
-    private int[] indexToCoords(int index)
+    public int[] indexToCoords(int index)
      {
 
         // Create an array of size boardDimensions to store our coordinates in
@@ -217,7 +225,7 @@ public class Board
     {
         return boundingBox;
     }
-    private int boundingProd()
+    public int boundingProd()
     {
         int temp = 1;
         for ( int bound : boundingBox )
@@ -228,9 +236,9 @@ public class Board
         return temp;
     }
 
-    public int size()
+    public int getBoardDimensions()
     {
-        return contents.length;
+        return boardDimensions;
     }
 
     // Initialise remaining tiles
@@ -457,8 +465,8 @@ public class Board
              i < contents.length;
              ++i )
         {
-            Tile currMine = contents[i];
-            currMine.setCoords(indexToCoords(i));
+            Tile currTile = contents[i];
+            currTile.setCoords(indexToCoords(i));
             // Count adjacent mines
             int adjMines = 0;
             // Get the tiles neighbours and iterate through them
@@ -478,9 +486,9 @@ public class Board
             }
 
             // Set mine.contents to be adjMines unless it is a mine
-            if ( currMine.getContents() != -1 )
+            if ( currTile.getContents() != -1 )
             {
-                currMine.setContents(adjMines);
+                currTile.setContents(adjMines);
             }
 
             // If this index is out-of-bounds, ignore it
@@ -627,6 +635,7 @@ public class Board
     {
         // Set dimensions to be x and y
         boundingBox = dimParam;
+        boardDimensions = dimParam.length;
 
         this.totalMines = totalMines;
 
