@@ -41,7 +41,19 @@ public class MainMenu
                 public void actionPerformed(ActionEvent e)
                 {
                     menuFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-                    Main.startGame(map);
+
+                    // Try to read the number of mines in from the text field.
+                    // If unreadable or less than 1, set mines to 1.
+                    int totalMines = 1;
+                    try
+                    {
+                        totalMines = Math.max(Integer.parseInt(mineField.getText()), 1);
+                    }
+                    catch (Exception mineExcept)
+                    {
+                        totalMines = 1;
+                    }
+                    Main.startGame(map, totalMines);
                     menuFrame.dispatchEvent(new WindowEvent(menuFrame, WindowEvent.WINDOW_CLOSING));
                 }
             });
@@ -84,6 +96,16 @@ public class MainMenu
 
     }
 
+    private GroupLayout.Group[] boundingBoxFields (GroupLayout layout)
+    {
+        // Create the basic elements of the array
+        GroupLayout.Group[] boundingFields = new GroupLayout.Group[2];
+        boundingFields[0] = layout.createSequentialGroup();
+        boundingFields[1] = layout.createParallelGroup(GroupLayout.Alignment.CENTER);
+
+        return boundingFields;
+    }
+
     private void prepareNewGameMenu()
     {
         // Define the graphical elements we want
@@ -92,13 +114,13 @@ public class MainMenu
         // mineField should contain positive integers
         mineField = new JTextField();
         mineField.addKeyListener(checkPositive);
-        mineField.setPreferredSize(getTextDim());
+        mineField.setMaximumSize(getTextDim());
         JLabel mineLabel = new JLabel("Total mines: ");
 
         // dimensionField should contain positive integers
         dimensionField = new JTextField();
         dimensionField.addKeyListener(checkPositive);
-        dimensionField.setPreferredSize(getTextDim());
+        dimensionField.setMaximumSize(getTextDim());
         JLabel dimensionLabel = new JLabel("D:");
 
         JButton beginButton = new JButton ( "Start game" );
@@ -142,10 +164,13 @@ public class MainMenu
         JPanel boundingBoxPanel = new JPanel();
         JLabel isSquareLabel = new JLabel("Square?");
         JCheckBox isSquare = new JCheckBox();
+        // Set square checkbox to be active and disabled for now
+        isSquare.doClick(1);
+        isSquare.setEnabled(false);
         JLabel lengthLabel = new JLabel("Length");
         lengthField = new JTextField();
         lengthField.addKeyListener(checkPositive);
-        lengthField.setPreferredSize(getTextDim());
+        lengthField.setMaximumSize(getTextDim());
         GroupLayout boundingBoxMenuLayout = new GroupLayout(boundingBoxPanel);
         boundingBoxMenuLayout.setHorizontalGroup(boundingBoxMenuLayout.createParallelGroup(GroupLayout.Alignment.TRAILING)
                                                          .addGroup(boundingBoxMenuLayout

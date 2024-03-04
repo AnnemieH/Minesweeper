@@ -20,12 +20,13 @@ public class Main
         }
         // Instantiäte variäbles
         //board = new Board(16, 16, 40);
-        board = loadBoard(currMap);
+        int currMines = board.getTotalMines();
+        board = loadBoard(currMap, currMines);
         ui = new GUI(board);
 
     }
     // Start the game from a given map
-    public static void startGame(File map)
+    public static void startGame(File map, int mines)
     {
         currMap = map;
         // If game is already running, end it
@@ -35,7 +36,7 @@ public class Main
         }
         // Instantiäte variäbles
         //board = new Board(16, 16, 40);
-        board = loadBoard(map);
+        board = loadBoard(map, mines);
         ui = new GUI(board);
 
     }
@@ -83,7 +84,7 @@ public class Main
     }
 
     // Load a board from a file
-    public static Board loadBoard(File map)
+    public static Board loadBoard(File map, int mines)
     {
         // Read the csv into board shape, reserving the first line for data
         LinkedList<LinkedList<String>> boardShape = new LinkedList<LinkedList<String>>();
@@ -102,7 +103,7 @@ public class Main
             System.out.println("File not found");
         }
 
-        return new Board(boardShape, dataLine, 70);
+        return new Board(boardShape, dataLine, mines);
     }
 
     // Quit the program

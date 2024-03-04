@@ -225,6 +225,10 @@ public class Board
     {
         return boundingBox;
     }
+    public String[] getBoardForm()
+    {
+        return boardForm;
+    }
     public int boundingProd()
     {
         int temp = 1;
@@ -239,6 +243,11 @@ public class Board
     public int getBoardDimensions()
     {
         return boardDimensions;
+    }
+
+    public int getTotalMines()
+    {
+        return totalMines;
     }
 
     // Initialise remaining tiles
@@ -668,6 +677,7 @@ public class Board
               i < boardShape.size();
               ++i )
         {
+            //System.out.println(boardShape.size());
             String[] tempArray = new String[boardShape.size()];
             boardShape.get(i).toArray(tempArray);
             System.arraycopy(tempArray,0, boardArray, i * boundingBox[0], tempArray.length);
