@@ -680,6 +680,8 @@ public class Board
             //System.out.println(boardShape.size());
             String[] tempArray = new String[boardShape.size()];
             boardShape.get(i).toArray(tempArray);
+
+
             System.arraycopy(tempArray,0, boardArray, i * boundingBox[0], tempArray.length);
         }
 
