@@ -1,0 +1,691 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Board.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Minesweeper</a> &gt; <a href="index.source.html" class="el_package">org.example</a> &gt; <span class="el_source">Board.java</span></div><h1>Board.java</h1><pre class="source lang-java linenums">package org.example;
+
+import java.util.*;
+
+public class Board
+{
+    // Keep track of whether the game has started
+<span class="fc" id="L8">    private boolean gameStarted = false;</span>
+    // How many dimensions are we playing in
+<span class="fc" id="L10">    int boardDimensions = 2;</span>
+<span class="fc" id="L11">    private Tile[] contents = new Tile[10];</span>
+    // Keep track of how many mines remaining the player thinks there is
+<span class="fc" id="L13">    private int minesToFind = 0;</span>
+<span class="fc" id="L14">    private int totalMines = 0;</span>
+    // How many tiles can the player click on without exploding
+<span class="fc" id="L16">    private int remainingSafeTiles = 0;</span>
+
+    // store teh bounding box of our map
+<span class="fc" id="L19">    private int[] boundingBox = new int[2];</span>
+
+    // Store the shape of a board with 'x' for an active tile and 'o' (or anything else) for an inactive tile
+    private LinkedList&lt;LinkedList&lt;String&gt;&gt; boardShape;
+    private String[] boardForm;
+
+    private int countActiveTiles ()
+    {
+<span class="fc" id="L27">        int active = 0;</span>
+
+        // Iterate through boardshape and count the number of active tiles
+<span class="fc bfc" id="L30" title="All 2 branches covered.">        for ( String tile : boardForm )</span>
+        {
+<span class="fc bfc" id="L32" title="All 2 branches covered.">            if ( tile.equals(&quot;x&quot;) )</span>
+            {
+<span class="fc" id="L34">                ++active;</span>
+            }
+        }
+
+
+<span class="fc" id="L39">        return active;</span>
+    }
+
+    // Given an array of coördinates, return the index they correspond to in this board.
+    // If coördinates are not present on the board, return -1
+    public int coordsToIndex(int[] coords)
+    {
+        // If coords is empty, return 0
+<span class="fc bfc" id="L47" title="All 2 branches covered.">        if ( coords.length == 0 )</span>
+        {
+<span class="fc" id="L49">            return 0;</span>
+        }
+
+        // If coords[0] is out of bounds, return -1
+<span class="fc bfc" id="L53" title="All 4 branches covered.">        if ( coords[0] &lt; 0 || coords[0] &gt;= boundingBox[0] )</span>
+        {
+<span class="fc" id="L55">                return -1;</span>
+        }
+        // Remove the first element from coords for recursion and store in strippedCoords
+<span class="fc" id="L58">        int[] strippedCoords = new int[coords.length - 1];</span>
+
+<span class="fc" id="L60">        for (  int i = 0;</span>
+<span class="fc bfc" id="L61" title="All 2 branches covered.">               i &lt; strippedCoords.length;</span>
+<span class="fc" id="L62">               ++i )</span>
+        {
+<span class="fc" id="L64">            strippedCoords[i] = coords[i + 1];</span>
+        }
+
+        // Remove the first element from BoundingBox for recursion
+<span class="fc" id="L68">        int[] strippedBoundingBox = new int[boundingBox.length - 1];</span>
+<span class="fc" id="L69">        for (  int i = 0;</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">               i &lt; strippedBoundingBox.length;</span>
+<span class="fc" id="L71">               ++i )</span>
+        {
+<span class="fc" id="L73">            strippedBoundingBox[i] = boundingBox[i + 1];</span>
+        }
+
+        // Return the appropriate index value, making sure that if it's negative, we set it to -1
+<span class="fc" id="L77">        return Math.max(coords[0] + (boundingBox[0] * coordsToIndex(strippedCoords, strippedBoundingBox)), -1);</span>
+/*
+        // Check if coördinates are out-of-bounds
+        if (coords[0] &lt; 0 || coords[0] &gt;= boundingBox[0] || coords[1] &lt; 0 || coords[1] &gt;= boundingBox[1])
+        {
+            return -1;
+        }
+        // The first 0, 1, ..., x-1 tiles will be with y = 0, the next x, x+1, ..., 2x - 1 will be y = 2 etc.
+        return coords[1] * boundingBox[0] + coords[0];*/
+    }
+    private int coordsToIndex(int[] coords, int[] remBoundingBox)
+    {
+        // If coords is empty, return 0
+<span class="pc bpc" id="L90" title="1 of 2 branches missed.">        if ( coords.length == 0 )</span>
+        {
+<span class="nc" id="L92">            return 0;</span>
+        }
+
+        // If coords[0] is out of bounds, return -1
+<span class="fc bfc" id="L96" title="All 4 branches covered.">        if ( coords[0] &lt; 0 || coords[0] &gt;= remBoundingBox[0] )</span>
+        {
+<span class="fc" id="L98">            return -1;</span>
+        }
+        // Remove the first element from coords for recursion and store in strippedCoords
+<span class="fc" id="L101">        int[] strippedCoords = new int[coords.length - 1];</span>
+
+<span class="fc" id="L103">        for ( int i = 0;</span>
+<span class="pc bpc" id="L104" title="1 of 2 branches missed.">              i &lt; strippedCoords.length;</span>
+<span class="nc" id="L105">              ++i )</span>
+        {
+<span class="nc" id="L107">            strippedCoords[i] = coords[i + 1];</span>
+        }
+
+        // Remove the first element from remBoundingBox for recursion
+<span class="fc" id="L111">        int[] strippedBoundingBox = new int[remBoundingBox.length - 1];</span>
+<span class="fc" id="L112">        for ( int i = 0;</span>
+<span class="pc bpc" id="L113" title="1 of 2 branches missed.">              i &lt; strippedBoundingBox.length;</span>
+<span class="nc" id="L114">              ++i )</span>
+        {
+<span class="nc" id="L116">                strippedBoundingBox[i] = remBoundingBox[i + 1];</span>
+        }
+
+        // Return the appropriate index value, making sure that if it's negative, we set it to -1
+<span class="fc" id="L120">        return Math.max(coords[0] + (remBoundingBox[0] * coordsToIndex(strippedCoords)), -1);</span>
+    }
+
+    // Given an index, return the coördinates they correspond to in this board, otherwise return [-1, -1]
+    public int[] indexToCoords(int index)
+     {
+
+        // Create an array of size boardDimensions to store our coordinates in
+<span class="fc" id="L128">        int[] coords = new int[boardDimensions];</span>
+
+        // If index is illegal, return a -1 array
+<span class="pc bpc" id="L131" title="2 of 4 branches missed.">        if ( index &lt; 0 || index &gt;= contents.length)</span>
+        {
+<span class="nc bnc" id="L133" title="All 2 branches missed.">            for ( int i : coords )</span>
+            {
+<span class="nc" id="L135">                coords[i] = -1;</span>
+            }
+<span class="nc" id="L137">            return coords;</span>
+        }
+
+<span class="fc" id="L140">        int strippedIndex = index;</span>
+<span class="fc" id="L141">        for ( int i = 0;</span>
+<span class="fc bfc" id="L142" title="All 2 branches covered.">              i &lt; coords.length;</span>
+<span class="fc" id="L143">              ++i )</span>
+        {
+<span class="fc" id="L145">            coords[i] = strippedIndex % boundingBox[i];</span>
+<span class="fc" id="L146">            strippedIndex /= boundingBox[i];</span>
+        }
+
+<span class="fc" id="L149">        return coords;</span>
+        /*if ( index &lt; 0 || index &gt; contents.length)
+        {
+            return new int[]{-1, -1};
+        }
+        // The first 0, 1, ..., x-1 tiles will be with y = 0, the next x, x+1, ..., 2x - 1 will be y = 2 etc.
+        int x = index % (boundingBox[0]);
+        int y = index / (boundingBox[0]);
+        return new int[]{x, y};*/
+    }
+
+    // If a tile has been revealed, update remainingSafeTiles and maybe win
+    public void safeTileRevealed()
+    {
+        // A turn has been taken, so ensure gameStarted is set to true
+<span class="nc" id="L164">        gameStarted = true;</span>
+<span class="nc" id="L165">        --remainingSafeTiles;</span>
+<span class="nc bnc" id="L166" title="All 2 branches missed.">        if ( remainingSafeTiles &lt;= 0 )</span>
+        {
+<span class="nc" id="L168">            Main.endGame(true);</span>
+        }
+<span class="nc" id="L170">    }</span>
+
+    // Mine has been hit
+    public void boom(Tile bombLoc)
+    {
+        // Check to see if this is the first turn.
+        // If it is, regenerate the board until the tile is not a bomb
+        // Otherwise, end the game
+
+<span class="nc bnc" id="L179" title="All 2 branches missed.">        if ( gameStarted )</span>
+        {
+<span class="nc" id="L181">            Main.endGame(false);</span>
+        }
+        else
+        {
+            // Click the button again to fix the GUI
+<span class="nc" id="L186">            bombLoc.reset();</span>
+<span class="nc" id="L187">            redoBoard();</span>
+            // Make sure that the game still counts this as not having started
+<span class="nc" id="L189">            gameStarted = false;</span>
+<span class="nc" id="L190">            bombLoc.revealTile();</span>
+        }
+
+<span class="nc" id="L193">    }</span>
+
+    // Chain reaction of tiles not adjacent to a mine
+    public void chainReact (Tile tile)
+    {
+        // For each neighbour of the tile reveal it
+<span class="nc bnc" id="L199" title="All 2 branches missed.">        for ( Tile neighbour : getNeighbours( tile.getCoords() ) )</span>
+        {
+<span class="nc" id="L201">            neighbour.revealTile();</span>
+        }
+<span class="nc" id="L203">    }</span>
+
+    // A mine has been flagged
+    public void mineFlagged ()
+    {
+<span class="nc" id="L208">        --minesToFind;</span>
+<span class="nc" id="L209">        Main.mineTotalUpdate(minesToFind);</span>
+<span class="nc" id="L210">    }</span>
+
+    // A mine has been unflagged
+    public void mineUnFlagged()
+    {
+<span class="nc" id="L215">        ++minesToFind;</span>
+<span class="nc" id="L216">        Main.mineTotalUpdate(minesToFind);</span>
+<span class="nc" id="L217">    }</span>
+
+    // GETTERS
+    public Tile getTileAt(int[] coords)
+    {
+<span class="fc" id="L222">        return contents[coordsToIndex(coords)];</span>
+    }
+    public int[] getBoundingBox()
+    {
+<span class="fc" id="L226">        return boundingBox;</span>
+    }
+    public String[] getBoardForm()
+    {
+<span class="fc" id="L230">        return boardForm;</span>
+    }
+    public int boundingProd()
+    {
+<span class="fc" id="L234">        int temp = 1;</span>
+<span class="fc bfc" id="L235" title="All 2 branches covered.">        for ( int bound : boundingBox )</span>
+        {
+<span class="fc" id="L237">            temp *= bound;</span>
+        }
+
+<span class="fc" id="L240">        return temp;</span>
+    }
+
+    public int getBoardDimensions()
+    {
+<span class="nc" id="L245">        return boardDimensions;</span>
+    }
+
+    public int getTotalMines()
+    {
+<span class="fc" id="L250">        return totalMines;</span>
+    }
+
+    // Initialise remaining tiles
+    private void initRemainingSafeTiles ()
+    {
+<span class="fc" id="L256">        int safeTiles = 0;</span>
+
+        // Count up active tiles
+<span class="fc bfc" id="L259" title="All 2 branches covered.">        for ( Tile tile : contents )</span>
+        {
+<span class="fc bfc" id="L261" title="All 2 branches covered.">            if ( tile.isActive() )</span>
+            {
+<span class="fc" id="L263">                ++safeTiles;</span>
+            }
+        }
+
+        // Subtract all the mines and set this equal to remainingSafeTiles
+<span class="fc" id="L268">        remainingSafeTiles = safeTiles - totalMines;</span>
+<span class="fc" id="L269">    }</span>
+
+    // Sum two arrays pairwise until one runs out of length
+    private int[] pairwiseSum(int[] array1, int[] array2)
+    {
+<span class="fc" id="L274">        int[] finalArray = new int[Math.min(array1.length, array2.length)];</span>
+<span class="fc" id="L275">        for (int i = 0;</span>
+<span class="fc bfc" id="L276" title="All 2 branches covered.">             i &lt; Math.min(array1.length, array2.length);</span>
+<span class="fc" id="L277">             i++)</span>
+        {
+<span class="fc" id="L279">            finalArray[i] = array1[i] + array2[i];</span>
+        }
+
+<span class="fc" id="L282">        return finalArray;</span>
+    }
+
+    private int pow (int number, int exponent)
+    {
+<span class="fc" id="L287">        int temp = 1;</span>
+<span class="fc" id="L288">        for ( int i = 0;</span>
+<span class="fc bfc" id="L289" title="All 2 branches covered.">              i &lt; exponent;</span>
+<span class="fc" id="L290">              ++i )</span>
+        {
+<span class="fc" id="L292">            temp *= number;</span>
+        }
+
+<span class="fc" id="L295">        return temp;</span>
+    }
+
+    // Generate an array of perturbations
+    private int[][] generatePerturbations(int[][] perturb, int dim)
+    {
+        // If dim == 0, we're done
+<span class="fc bfc" id="L302" title="All 2 branches covered.">        if ( dim == 0 )</span>
+        {
+<span class="fc" id="L304">            return perturb;</span>
+        }
+
+<span class="fc" id="L307">        int[][] newPerturb = new int[pow(3,boardDimensions - dim + 1)][boardDimensions];</span>
+
+        // For each perturbation already found, take it and add +1, -1 and 0 in the next dimension
+<span class="fc" id="L310">        for ( int i = 0;</span>
+<span class="fc bfc" id="L311" title="All 2 branches covered.">               i &lt; perturb.length;</span>
+<span class="fc" id="L312">               ++i )</span>
+        {
+<span class="fc" id="L314">            int[] currPerturb = perturb[i];</span>
+<span class="fc" id="L315">            currPerturb[boardDimensions - dim] = 1;</span>
+<span class="fc" id="L316">            System.arraycopy(currPerturb, 0, newPerturb[3 * i], 0, currPerturb.length);</span>
+<span class="fc" id="L317">            currPerturb[boardDimensions - dim] = -1;</span>
+<span class="fc" id="L318">            System.arraycopy(currPerturb, 0, newPerturb[(3 * i) + 1], 0, currPerturb.length);</span>
+<span class="fc" id="L319">            currPerturb[boardDimensions - dim] = 0;</span>
+<span class="fc" id="L320">            System.arraycopy(currPerturb, 0, newPerturb[(3 * i) + 2], 0, currPerturb.length);</span>
+        }
+
+<span class="fc" id="L323">        return generatePerturbations(newPerturb, dim - 1);</span>
+    }
+
+    private int[][] generatePerturbations()
+    {
+<span class="fc" id="L328">        int[][] newPerturb = new int[1][boardDimensions];</span>
+
+        // Generate all the unitary perturbations plus the 0 permutation
+<span class="fc" id="L331">        int[][] fullPerturb = generatePerturbations(newPerturb, boardDimensions);</span>
+
+        // Return the unitary permutations with 0 stripped out
+<span class="fc" id="L334">        return Arrays.copyOfRange(fullPerturb, 0, fullPerturb.length - 1);</span>
+    }
+    // Given coordinates, return its 8 neighbours
+    public Tile[] getNeighbours(int[] coords)
+    {
+<span class="fc" id="L339">        int[][] perturbations = generatePerturbations();</span>
+
+<span class="fc" id="L341">        ArrayList&lt;Tile&gt; neighbourList = new ArrayList&lt;Tile&gt;();</span>
+
+<span class="fc" id="L343">        int[] indexArray = new int[pow(3, boardDimensions) - 1];</span>
+<span class="fc" id="L344">        for ( int i = 0;</span>
+<span class="fc bfc" id="L345" title="All 2 branches covered.">              i &lt; indexArray.length;</span>
+<span class="fc" id="L346">              ++i )</span>
+        {
+<span class="fc" id="L348">            indexArray[i] = coordsToIndex(pairwiseSum(coords, perturbations[i]));</span>
+        }
+
+<span class="fc" id="L351">        int arrayLength = 0;</span>
+        // Count the indices in bounds
+<span class="fc bfc" id="L353" title="All 2 branches covered.">        for ( int index : indexArray )</span>
+        {
+
+<span class="pc bpc" id="L356" title="1 of 6 branches missed.">            if ( index &gt;= 0 &amp;&amp; index &lt; contents.length &amp;&amp; isInBounds(indexToCoords(index)) )</span>
+            {
+<span class="fc" id="L358">                ++arrayLength;</span>
+            }
+        }
+
+        // Create an array of size arrayLength
+<span class="fc" id="L363">        Tile[] neighbours = new Tile[arrayLength];</span>
+
+        // Add the tiles at non-negative in-bounds indices to this array
+<span class="fc" id="L366">        int neighboursSize = 0;</span>
+<span class="fc bfc" id="L367" title="All 2 branches covered.">        for ( int index : indexArray )</span>
+        {
+<span class="fc bfc" id="L369" title="All 4 branches covered.">            if ( index &gt;= 0 &amp;&amp; isInBounds(indexToCoords(index))  )</span>
+            {
+<span class="fc" id="L371">                Tile possNeighbour = getTileAt(indexToCoords(index));</span>
+<span class="fc" id="L372">                neighbours[neighboursSize] = possNeighbour;</span>
+<span class="fc" id="L373">                ++neighboursSize;</span>
+
+            }
+        }
+
+<span class="fc" id="L378">        return neighbours;</span>
+    }
+
+    // Is given coördinates in bounds of the map
+    private Boolean isInBounds(int[] coords)
+    {
+<span class="fc" id="L384">        return (boardForm[coordsToIndex(coords)]).equals(&quot;x&quot;);</span>
+    }
+
+    // Initialise the board with tiles
+    private void initBoard()
+    {
+        // Keep an array of all the mines
+<span class="fc" id="L391">        int[][] mineList = new int[minesToFind][2];</span>
+
+        // Uniformly at random allocate the mines
+<span class="fc" id="L394">        Random rand = new Random();</span>
+
+<span class="fc" id="L396">        int size = 1;</span>
+
+        // Fill the board with tiles
+<span class="fc" id="L399">        for ( int i = 0;</span>
+<span class="fc bfc" id="L400" title="All 2 branches covered.">              i &lt; boardDimensions;</span>
+<span class="fc" id="L401">              ++i )</span>
+        {
+<span class="fc" id="L403">            size *= boundingBox[i];</span>
+        }
+<span class="fc" id="L405">        contents = new Tile[size];</span>
+
+        // Recalculate totalMines now that everything's initialised
+<span class="fc" id="L408">        totalMines = Math.min(totalMines, countActiveTiles() - 1);</span>
+<span class="fc" id="L409">        minesToFind = totalMines;</span>
+
+<span class="fc" id="L411">        for ( int i = 0;</span>
+<span class="fc bfc" id="L412" title="All 2 branches covered.">              i &lt; contents.length;</span>
+<span class="fc" id="L413">              ++i )</span>
+        {
+<span class="fc" id="L415">            contents[i] = new Tile(this, indexToCoords(i));</span>
+        }
+
+        mineGen:
+<span class="fc" id="L419">        for (int i = 0;</span>
+<span class="fc bfc" id="L420" title="All 2 branches covered.">             i &lt; totalMines;</span>
+<span class="fc" id="L421">             i++)</span>
+        {
+            // If we're trying to add more mines than spaces on the board, abort this loop so there is at least one
+            // unmined space
+<span class="pc bpc" id="L425" title="1 of 2 branches missed.">            if ( i &gt;= countActiveTiles() - 1)</span>
+            {
+<span class="nc" id="L427">                totalMines = i - 1;</span>
+<span class="nc" id="L428">                break;</span>
+            }
+
+<span class="fc" id="L431">            int[] mineLocation = new int[boardDimensions];</span>
+
+<span class="fc" id="L433">            for ( int j = 0;</span>
+<span class="fc bfc" id="L434" title="All 2 branches covered.">                  j &lt; boardDimensions;</span>
+<span class="fc" id="L435">                  ++j )</span>
+            {
+<span class="fc" id="L437">                mineLocation[j] = rand.nextInt(boundingBox[j]);</span>
+            }
+
+            // Check to see if we've already mined this spot
+            // If not, then repeat this loops
+<span class="fc bfc" id="L442" title="All 2 branches covered.">            for( int[] mine : mineList)</span>
+            {
+<span class="pc bpc" id="L444" title="1 of 2 branches missed.">                if (mineLocation == mine)</span>
+                {
+<span class="nc" id="L446">                    --i;</span>
+<span class="nc" id="L447">                    continue mineGen;</span>
+                }
+            }
+
+            // Check to see if we're in-bounds.
+            // If not, then repeat this loops
+<span class="fc bfc" id="L453" title="All 2 branches covered.">            if ( !isInBounds(mineLocation))</span>
+            {
+<span class="fc" id="L455">                --i;</span>
+<span class="fc" id="L456">                continue;</span>
+            }
+<span class="fc" id="L458">            mineList[i] = mineLocation;</span>
+        }
+        // Set the chosen tiles to be mines
+<span class="fc bfc" id="L461" title="All 2 branches covered.">        for( int[] mine : mineList )</span>
+        {
+<span class="fc" id="L463">            int index = coordsToIndex(mine);</span>
+<span class="pc bpc" id="L464" title="1 of 2 branches missed.">            if ( index == -1 )</span>
+            {
+<span class="nc" id="L466">                System.out.println(&quot;Error in board construction&quot;);</span>
+            }
+
+<span class="fc" id="L469">            contents[index].setMine();</span>
+        }
+
+        // Assign remaining tiles
+<span class="fc" id="L473">        for (int i = 0;</span>
+<span class="fc bfc" id="L474" title="All 2 branches covered.">             i &lt; contents.length;</span>
+<span class="fc" id="L475">             ++i )</span>
+        {
+<span class="fc" id="L477">            Tile currTile = contents[i];</span>
+<span class="fc" id="L478">            currTile.setCoords(indexToCoords(i));</span>
+            // Count adjacent mines
+<span class="fc" id="L480">            int adjMines = 0;</span>
+            // Get the tiles neighbours and iterate through them
+
+<span class="fc" id="L483">            Tile[] neighbours = getNeighbours(indexToCoords(i));</span>
+
+
+            // For each neighbour that is a mine, increment adjMines
+<span class="fc" id="L487">            for ( int j = 0;</span>
+<span class="fc bfc" id="L488" title="All 2 branches covered.">                  j &lt; neighbours.length;</span>
+<span class="fc" id="L489">                  ++j )</span>
+            {
+<span class="fc bfc" id="L491" title="All 2 branches covered.">                if ( neighbours[j].getContents() == -1 )</span>
+                {
+<span class="fc" id="L493">                    ++adjMines;</span>
+                }
+            }
+
+            // Set mine.contents to be adjMines unless it is a mine
+<span class="fc bfc" id="L498" title="All 2 branches covered.">            if ( currTile.getContents() != -1 )</span>
+            {
+<span class="fc" id="L500">                currTile.setContents(adjMines);</span>
+            }
+
+            // If this index is out-of-bounds, ignore it
+<span class="fc bfc" id="L504" title="All 2 branches covered.">            if ( !isInBounds(indexToCoords(i)))</span>
+            {
+<span class="fc" id="L506">                getTileAt(indexToCoords(i)).deActivate();</span>
+            }
+        }
+        // Initialise tiles to find
+<span class="fc" id="L510">        initRemainingSafeTiles();</span>
+<span class="fc" id="L511">        gameStarted = false;</span>
+<span class="fc" id="L512">    }</span>
+    // Reallocate the mines to cheat
+    private void redoBoard()
+    {
+        // Keep an array of all the mines
+<span class="nc" id="L517">        int[][] mineList = new int[minesToFind][2];</span>
+
+        // Set the contents of all tiles to be 0
+<span class="nc bnc" id="L520" title="All 2 branches missed.">        for ( Tile t : contents )</span>
+        {
+<span class="nc" id="L522">            t.reset();</span>
+        }
+
+        // Uniformly at random allocate the mines
+<span class="nc" id="L526">        Random rand = new Random();</span>
+
+        mineGen:
+<span class="nc" id="L529">        for (int i = 0;</span>
+<span class="nc bnc" id="L530" title="All 2 branches missed.">             i &lt; totalMines;</span>
+<span class="nc" id="L531">             i++)</span>
+        {
+            // If we're trying to add more mines than spaces on the board, abort this loop so there is at least one
+            // unmined space
+<span class="nc bnc" id="L535" title="All 2 branches missed.">            if ( i &gt;= countActiveTiles() - 1)</span>
+            {
+<span class="nc" id="L537">                totalMines = i - 1;</span>
+<span class="nc" id="L538">                break;</span>
+            }
+
+<span class="nc" id="L541">            int[] mineLocation = new int[boardDimensions];</span>
+
+<span class="nc" id="L543">            for ( int j = 0;</span>
+<span class="nc bnc" id="L544" title="All 2 branches missed.">                  j &lt; boardDimensions;</span>
+<span class="nc" id="L545">                  ++j )</span>
+            {
+<span class="nc" id="L547">                mineLocation[j] = rand.nextInt(boundingBox[j]);</span>
+            }
+
+            // Check to see if we've already mined this spot
+            // If not, then repeat this loops
+<span class="nc bnc" id="L552" title="All 2 branches missed.">            for( int[] mine : mineList)</span>
+            {
+<span class="nc bnc" id="L554" title="All 2 branches missed.">                if (mineLocation == mine)</span>
+                {
+<span class="nc" id="L556">                    --i;</span>
+<span class="nc" id="L557">                    continue mineGen;</span>
+                }
+            }
+
+            // Check to see if we're in-bounds.
+            // If not, then repeat this loops
+<span class="nc bnc" id="L563" title="All 2 branches missed.">            if ( !isInBounds(mineLocation))</span>
+            {
+<span class="nc" id="L565">                --i;</span>
+<span class="nc" id="L566">                continue;</span>
+            }
+<span class="nc" id="L568">            mineList[i] = mineLocation;</span>
+        }
+
+        // Set the chosen tiles to be mines
+<span class="nc bnc" id="L572" title="All 2 branches missed.">        for( int[] mine : mineList )</span>
+        {
+<span class="nc" id="L574">            int index = coordsToIndex(mine);</span>
+<span class="nc bnc" id="L575" title="All 2 branches missed.">            if ( index == -1 )</span>
+            {
+<span class="nc" id="L577">                System.out.println(&quot;Error in board construction&quot;);</span>
+            }
+
+<span class="nc" id="L580">            contents[index].setMine();</span>
+        }
+
+        // Assign remaining tiles
+<span class="nc" id="L584">        for (int i = 0;</span>
+<span class="nc bnc" id="L585" title="All 2 branches missed.">             i &lt; contents.length;</span>
+<span class="nc" id="L586">             ++i )</span>
+        {
+<span class="nc" id="L588">            Tile currMine = contents[i];</span>
+<span class="nc" id="L589">            currMine.setCoords(indexToCoords(i));</span>
+            // Count adjacent mines
+<span class="nc" id="L591">            int adjMines = 0;</span>
+            // Get the tiles neighbours and iterate through them
+
+<span class="nc" id="L594">            Tile[] neighbours = getNeighbours(indexToCoords(i));</span>
+
+
+            // For each neighbour that is a mine, increment adjMines
+<span class="nc" id="L598">            for ( int j = 0;</span>
+<span class="nc bnc" id="L599" title="All 2 branches missed.">                  j &lt; neighbours.length;</span>
+<span class="nc" id="L600">                  ++j )</span>
+            {
+<span class="nc bnc" id="L602" title="All 2 branches missed.">                if ( neighbours[j].getContents() == -1 )</span>
+                {
+<span class="nc" id="L604">                    ++adjMines;</span>
+                }
+            }
+
+            // Set mine.contents to be adjMines unless it is a mine
+<span class="nc bnc" id="L609" title="All 2 branches missed.">            if ( currMine.getContents() != -1 )</span>
+            {
+<span class="nc" id="L611">                currMine.setContents(adjMines);</span>
+            }
+
+            // If this index is out-of-bounds, ignore it
+<span class="nc bnc" id="L615" title="All 2 branches missed.">            if ( !isInBounds(indexToCoords(i)))</span>
+            {
+<span class="nc" id="L617">                getTileAt(indexToCoords(i)).deActivate();</span>
+            }
+        }
+
+        // Initialise number of tiles to find
+<span class="nc" id="L622">        initRemainingSafeTiles();</span>
+<span class="nc" id="L623">        gameStarted = false;</span>
+<span class="nc" id="L624">    }</span>
+
+    // Create a board filled with available spaces of the correct dimension and bounds
+    private String[] genDefaultBoard()
+    {
+<span class="fc" id="L629">        int length = 1;</span>
+        // Generate an array of size equal to the product of boundingBox
+<span class="fc bfc" id="L631" title="All 2 branches covered.">        for ( int dim : boundingBox )</span>
+        {
+<span class="fc" id="L633">            length *= dim;</span>
+        }
+
+        // return an array of size length and fill it with 'x'
+<span class="fc" id="L637">        String[] defaultBoard = new String[length];</span>
+<span class="fc" id="L638">        Arrays.fill(defaultBoard, &quot;x&quot;);</span>
+<span class="fc" id="L639">        return defaultBoard;</span>
+    }
+
+    // CONSTRUCTORS
+    public Board(int[] dimParam, int totalMines)
+<span class="fc" id="L644">    {</span>
+        // Set dimensions to be x and y
+<span class="fc" id="L646">        boundingBox = dimParam;</span>
+<span class="fc" id="L647">        boardDimensions = dimParam.length;</span>
+
+<span class="fc" id="L649">        this.totalMines = totalMines;</span>
+
+        // Set minesToFind to be totalMines
+<span class="fc" id="L652">        minesToFind = totalMines;</span>
+<span class="fc" id="L653">        Main.mineTotalUpdate(minesToFind);</span>
+
+<span class="fc" id="L655">        boardForm = genDefaultBoard();</span>
+
+<span class="fc" id="L657">        initBoard();</span>
+<span class="fc" id="L658">    }</span>
+
+    public Board( LinkedList&lt;LinkedList&lt;String&gt;&gt; boardShape, LinkedList&lt;String&gt; dataLine, int totalMines)
+<span class="fc" id="L661">    {</span>
+<span class="fc" id="L662">        minesToFind = totalMines;</span>
+<span class="fc" id="L663">        Main.mineTotalUpdate(minesToFind);</span>
+<span class="fc" id="L664">        this.totalMines = totalMines;</span>
+
+        // dataLine contains boundingBox so set that
+<span class="fc" id="L667">        for ( int i = 0;</span>
+<span class="fc bfc" id="L668" title="All 2 branches covered.">              i &lt; dataLine.size();</span>
+<span class="fc" id="L669">              ++i )</span>
+        {
+<span class="fc" id="L671">            boundingBox[i] = Integer.parseInt(dataLine.get(i));</span>
+        }
+
+        // Unpack boardShape and turn into an array
+<span class="fc" id="L675">        String[] boardArray = new String[boundingProd()];</span>
+<span class="fc" id="L676">        for ( int i = 0;</span>
+<span class="fc bfc" id="L677" title="All 2 branches covered.">              i &lt; boardShape.size();</span>
+<span class="fc" id="L678">              ++i )</span>
+        {
+            //System.out.println(boardShape.size());
+<span class="fc" id="L681">            String[] tempArray = new String[boardShape.size()];</span>
+<span class="fc" id="L682">            boardShape.get(i).toArray(tempArray);</span>
+<span class="fc" id="L683">            System.arraycopy(tempArray,0, boardArray, i * boundingBox[0], tempArray.length);</span>
+        }
+
+<span class="fc" id="L686">        boardForm = boardArray;</span>
+
+<span class="fc" id="L688">        initBoard();</span>
+<span class="fc" id="L689">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

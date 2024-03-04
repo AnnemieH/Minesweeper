@@ -1,0 +1,365 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MainMenu.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Minesweeper</a> &gt; <a href="index.source.html" class="el_package">org.example</a> &gt; <span class="el_source">MainMenu.java</span></div><h1>MainMenu.java</h1><pre class="source lang-java linenums">package org.example;
+
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
+import java.awt.event.*;
+import java.io.File;
+import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+
+public class MainMenu
+{
+<span class="nc" id="L14">    private JFrame menuFrame = new JFrame();</span>
+<span class="nc" id="L15">    private JPanel mainPanel = new JPanel();</span>
+    // Menu buttons
+<span class="nc" id="L17">    private JButton newGameButton = new JButton(&quot;New Game&quot;);</span>
+<span class="nc" id="L18">    private JButton quitGameButton = new JButton(&quot;Quit Game&quot;);</span>
+    // Menu fields
+    private JTextField mineField;
+    private JTextField dimensionField;
+    private JTextField lengthField;
+
+    // Constants
+<span class="nc" id="L25">    private int textWidth = 100;</span>
+<span class="nc" id="L26">    private int textHeight = 20;</span>
+
+    // Find all game maps and store them in an ArrayList
+    private ArrayList &lt;JButton&gt; findMaps()
+    {
+<span class="nc" id="L31">        ArrayList &lt;JButton&gt; maps = new ArrayList&lt;JButton&gt;();</span>
+<span class="nc" id="L32">        File[] loadedMaps = new File(&quot;src/main/resources/Maps&quot;).listFiles();</span>
+
+        // For every file we've just found, create a button that, on press, will start the game with that map
+<span class="nc bnc" id="L35" title="All 2 branches missed.">        for( File map : loadedMaps )</span>
+        {
+<span class="nc" id="L37">            JButton loadMap = new JButton();</span>
+<span class="nc" id="L38">            loadMap.addActionListener(new ActionListener()</span>
+<span class="nc" id="L39">            {</span>
+                @Override
+                public void actionPerformed(ActionEvent e)
+                {
+<span class="nc" id="L43">                    menuFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);</span>
+
+                    // Try to read the number of mines in from the text field.
+                    // If unreadable or less than 1, set mines to 1.
+<span class="nc" id="L47">                    int totalMines = 1;</span>
+                    try
+                    {
+<span class="nc" id="L50">                        totalMines = Math.max(Integer.parseInt(mineField.getText()), 1);</span>
+                    }
+<span class="nc" id="L52">                    catch (Exception mineExcept)</span>
+                    {
+<span class="nc" id="L54">                        totalMines = 1;</span>
+<span class="nc" id="L55">                    }</span>
+<span class="nc" id="L56">                    Main.startGame(map, totalMines);</span>
+<span class="nc" id="L57">                    menuFrame.dispatchEvent(new WindowEvent(menuFrame, WindowEvent.WINDOW_CLOSING));</span>
+<span class="nc" id="L58">                }</span>
+            });
+
+            // Name the button
+<span class="nc" id="L62">            String mapName = map.getName();</span>
+<span class="nc" id="L63">            mapName = mapName.substring(0, mapName.length() - 4);</span>
+<span class="nc" id="L64">            loadMap.setText(mapName);</span>
+<span class="nc" id="L65">            maps.add(loadMap);</span>
+        }
+
+<span class="nc" id="L68">        return maps;</span>
+    }
+
+    // Get the menu ready
+    private void prepareMainMenu()
+    {
+<span class="nc" id="L74">        menuFrame.setSize(200, 600);</span>
+<span class="nc" id="L75">        menuFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);</span>
+
+<span class="nc" id="L77">        BoxLayout layout = new BoxLayout(mainPanel, BoxLayout.Y_AXIS);</span>
+<span class="nc" id="L78">        mainPanel.setLayout(layout);</span>
+
+<span class="nc" id="L80">        mainPanel.setBorder(new EmptyBorder(new Insets (100, 75, 100, 75)));</span>
+
+<span class="nc" id="L82">        newGameButton.addActionListener(newGameListener);</span>
+<span class="nc" id="L83">        mainPanel.add(newGameButton);</span>
+
+<span class="nc" id="L85">        Dimension min = new Dimension(10, 10);</span>
+<span class="nc" id="L86">        Dimension pref = new Dimension(20, 20);</span>
+<span class="nc" id="L87">        Dimension max = new Dimension(50, 50);</span>
+<span class="nc" id="L88">        mainPanel.add(new Box.Filler(min, pref, max));</span>
+
+<span class="nc" id="L90">        quitGameButton.addActionListener(quitGameListener);</span>
+<span class="nc" id="L91">        mainPanel.add(quitGameButton);</span>
+
+<span class="nc" id="L93">        menuFrame.add(mainPanel);</span>
+<span class="nc" id="L94">        menuFrame.pack();</span>
+<span class="nc" id="L95">        menuFrame.setVisible(true);</span>
+
+<span class="nc" id="L97">    }</span>
+
+    private GroupLayout.Group[] boundingBoxFields (GroupLayout layout)
+    {
+        // Create the basic elements of the array
+<span class="nc" id="L102">        GroupLayout.Group[] boundingFields = new GroupLayout.Group[2];</span>
+<span class="nc" id="L103">        boundingFields[0] = layout.createSequentialGroup();</span>
+<span class="nc" id="L104">        boundingFields[1] = layout.createParallelGroup(GroupLayout.Alignment.CENTER);</span>
+
+<span class="nc" id="L106">        return boundingFields;</span>
+    }
+
+    private void prepareNewGameMenu()
+    {
+        // Define the graphical elements we want
+<span class="nc" id="L112">        JPanel newGamePanel = new JPanel();</span>
+
+        // mineField should contain positive integers
+<span class="nc" id="L115">        mineField = new JTextField();</span>
+<span class="nc" id="L116">        mineField.addKeyListener(checkPositive);</span>
+<span class="nc" id="L117">        mineField.setMaximumSize(getTextDim());</span>
+<span class="nc" id="L118">        JLabel mineLabel = new JLabel(&quot;Total mines: &quot;);</span>
+
+        // dimensionField should contain positive integers
+<span class="nc" id="L121">        dimensionField = new JTextField();</span>
+<span class="nc" id="L122">        dimensionField.addKeyListener(checkPositive);</span>
+<span class="nc" id="L123">        dimensionField.setMaximumSize(getTextDim());</span>
+<span class="nc" id="L124">        JLabel dimensionLabel = new JLabel(&quot;D:&quot;);</span>
+
+<span class="nc" id="L126">        JButton beginButton = new JButton ( &quot;Start game&quot; );</span>
+<span class="nc" id="L127">        beginButton.addActionListener(startGameListener);</span>
+
+        // Define the layout
+        // Layout of basic parameters.
+        // e.g. number of mines, dimension
+<span class="nc" id="L132">        JPanel paramPanel = new JPanel();</span>
+<span class="nc" id="L133">        GroupLayout paramLayout = new GroupLayout(paramPanel);</span>
+
+<span class="nc" id="L135">        paramLayout.setHorizontalGroup(paramLayout.createParallelGroup(GroupLayout.Alignment.TRAILING)</span>
+<span class="nc" id="L136">                                                 .addGroup(paramLayout</span>
+<span class="nc" id="L137">                                                                   .createSequentialGroup()</span>
+<span class="nc" id="L138">                                                                   .addComponent(mineLabel)</span>
+<span class="nc" id="L139">                                                                   .addComponent(mineField)</span>
+                                                          )
+<span class="nc" id="L141">                                                 .addGroup(paramLayout</span>
+<span class="nc" id="L142">                                                                   .createSequentialGroup()</span>
+<span class="nc" id="L143">                                                                   .addComponent(dimensionLabel)</span>
+<span class="nc" id="L144">                                                                   .addComponent(dimensionField)</span>
+                                                          )
+                                        );
+<span class="nc" id="L147">        paramLayout.setVerticalGroup(paramLayout.createSequentialGroup()</span>
+<span class="nc" id="L148">                                               .addGroup(</span>
+<span class="nc" id="L149">                                                       paramLayout.createParallelGroup()</span>
+<span class="nc" id="L150">                                                               .addComponent(mineLabel)</span>
+<span class="nc" id="L151">                                                               .addComponent(mineField)</span>
+                                                        )
+<span class="nc" id="L153">                                               .addGroup(</span>
+<span class="nc" id="L154">                                                       paramLayout.createParallelGroup()</span>
+<span class="nc" id="L155">                                                               .addComponent(dimensionLabel)</span>
+<span class="nc" id="L156">                                                               .addComponent(dimensionField)</span>
+                                                        )
+                                      );
+
+<span class="nc" id="L160">        paramPanel.setLayout(paramLayout);</span>
+<span class="nc" id="L161">        paramPanel.setVisible(true);</span>
+
+        // Layout of the bounding box menu
+<span class="nc" id="L164">        JPanel boundingBoxPanel = new JPanel();</span>
+<span class="nc" id="L165">        JLabel isSquareLabel = new JLabel(&quot;Square?&quot;);</span>
+<span class="nc" id="L166">        JCheckBox isSquare = new JCheckBox();</span>
+        // Set square checkbox to be active and disabled for now
+<span class="nc" id="L168">        isSquare.doClick(1);</span>
+<span class="nc" id="L169">        isSquare.setEnabled(false);</span>
+<span class="nc" id="L170">        JLabel lengthLabel = new JLabel(&quot;Length&quot;);</span>
+<span class="nc" id="L171">        lengthField = new JTextField();</span>
+<span class="nc" id="L172">        lengthField.addKeyListener(checkPositive);</span>
+<span class="nc" id="L173">        lengthField.setMaximumSize(getTextDim());</span>
+<span class="nc" id="L174">        GroupLayout boundingBoxMenuLayout = new GroupLayout(boundingBoxPanel);</span>
+<span class="nc" id="L175">        boundingBoxMenuLayout.setHorizontalGroup(boundingBoxMenuLayout.createParallelGroup(GroupLayout.Alignment.TRAILING)</span>
+<span class="nc" id="L176">                                                         .addGroup(boundingBoxMenuLayout</span>
+<span class="nc" id="L177">                                                                           .createSequentialGroup()</span>
+<span class="nc" id="L178">                                                                           .addComponent(isSquareLabel)</span>
+<span class="nc" id="L179">                                                                           .addComponent(isSquare)</span>
+                                                                  )
+<span class="nc" id="L181">                                                         .addGroup(boundingBoxMenuLayout</span>
+<span class="nc" id="L182">                                                                           .createSequentialGroup()</span>
+<span class="nc" id="L183">                                                                           .addComponent(lengthLabel)</span>
+<span class="nc" id="L184">                                                                           .addComponent(lengthField)</span>
+                                                                  )
+                                                );
+<span class="nc" id="L187">        boundingBoxMenuLayout.setVerticalGroup(boundingBoxMenuLayout.createSequentialGroup()</span>
+<span class="nc" id="L188">                                                       .addGroup(boundingBoxMenuLayout</span>
+<span class="nc" id="L189">                                                                         .createParallelGroup()</span>
+<span class="nc" id="L190">                                                                         .addComponent(isSquareLabel)</span>
+<span class="nc" id="L191">                                                                         .addComponent(isSquare)</span>
+                                                                )
+<span class="nc" id="L193">                                                       .addGroup(boundingBoxMenuLayout</span>
+<span class="nc" id="L194">                                                                         .createParallelGroup()</span>
+<span class="nc" id="L195">                                                                         .addComponent(lengthLabel)</span>
+<span class="nc" id="L196">                                                                         .addComponent(lengthField)</span>
+                                                                )
+                                                );
+<span class="nc" id="L199">        boundingBoxPanel.setLayout(boundingBoxMenuLayout);</span>
+
+        // Layout of the load game menu
+<span class="nc" id="L202">        JPanel loadPanel = new JPanel();</span>
+<span class="nc" id="L203">        JLabel loadLabel = new JLabel(&quot;Maps Available:&quot;);</span>
+<span class="nc" id="L204">        GroupLayout loadPanelMenuLayout = new GroupLayout(loadPanel);</span>
+<span class="nc" id="L205">        GroupLayout.SequentialGroup loadPanelSeqGroup = loadPanelMenuLayout.createSequentialGroup();</span>
+<span class="nc" id="L206">        GroupLayout.ParallelGroup loadPanelParGroup = loadPanelMenuLayout.createParallelGroup(GroupLayout.Alignment.LEADING);</span>
+
+<span class="nc" id="L208">        loadPanelSeqGroup.addComponent(loadLabel);</span>
+<span class="nc" id="L209">        loadPanelParGroup.addComponent(loadLabel);</span>
+
+<span class="nc bnc" id="L211" title="All 2 branches missed.">        for ( JButton map : findMaps())</span>
+        {
+<span class="nc" id="L213">            loadPanelSeqGroup.addComponent(map);</span>
+<span class="nc" id="L214">            loadPanelParGroup.addComponent(map);</span>
+<span class="nc" id="L215">        }</span>
+<span class="nc" id="L216">        loadPanelMenuLayout.setHorizontalGroup(loadPanelParGroup);</span>
+<span class="nc" id="L217">        loadPanelMenuLayout.setVerticalGroup(loadPanelSeqGroup);</span>
+<span class="nc" id="L218">        loadPanel.setLayout(loadPanelMenuLayout);</span>
+
+
+
+        // Layout of the larger options menu
+<span class="nc" id="L223">        JPanel optionsPanel = new JPanel();</span>
+<span class="nc" id="L224">        GroupLayout optionsPanelMenuLayout = new GroupLayout(optionsPanel);</span>
+<span class="nc" id="L225">        optionsPanelMenuLayout.setHorizontalGroup(optionsPanelMenuLayout.createSequentialGroup()</span>
+<span class="nc" id="L226">                                                          .addComponent(paramPanel)</span>
+<span class="nc" id="L227">                                                          .addComponent(boundingBoxPanel)</span>
+<span class="nc" id="L228">                                                          .addComponent(loadPanel)</span>
+                                                 );
+<span class="nc" id="L230">        optionsPanelMenuLayout.setVerticalGroup(optionsPanelMenuLayout.createParallelGroup(GroupLayout.Alignment.LEADING)</span>
+<span class="nc" id="L231">                                                        .addComponent(paramPanel)</span>
+<span class="nc" id="L232">                                                        .addComponent(boundingBoxPanel)</span>
+<span class="nc" id="L233">                                                        .addComponent(loadPanel)</span>
+                                               );
+<span class="nc" id="L235">        optionsPanel.setLayout(optionsPanelMenuLayout);</span>
+
+        // Layout of the global menu
+<span class="nc" id="L238">        GroupLayout newGameMenuGroup = new GroupLayout(newGamePanel);</span>
+<span class="nc" id="L239">        newGameMenuGroup.setHorizontalGroup(newGameMenuGroup.createParallelGroup(GroupLayout.Alignment.TRAILING)</span>
+<span class="nc" id="L240">                                                    .addComponent(optionsPanel)</span>
+<span class="nc" id="L241">                                                    .addComponent(beginButton)</span>
+                                           );
+<span class="nc" id="L243">        newGameMenuGroup.setVerticalGroup(newGameMenuGroup.createSequentialGroup()</span>
+<span class="nc" id="L244">                                                  .addComponent(optionsPanel)</span>
+<span class="nc" id="L245">                                                  .addComponent(beginButton)</span>
+                                         );
+<span class="nc" id="L247">        newGamePanel.setLayout(newGameMenuGroup);</span>
+
+<span class="nc" id="L249">        menuFrame.add(newGamePanel);</span>
+<span class="nc" id="L250">        menuFrame.pack();</span>
+<span class="nc" id="L251">    }</span>
+
+    // GETTERS
+
+
+    public int getTextWidth()
+    {
+<span class="nc" id="L258">        return textWidth;</span>
+    }
+
+    public int getTextHeight()
+    {
+<span class="nc" id="L263">        return textHeight;</span>
+    }
+
+    public Dimension getTextDim()
+    {
+<span class="nc" id="L268">        return new Dimension(getTextWidth(), getTextHeight());</span>
+    }
+
+    // CONSTRUCTOR
+    public MainMenu ()
+<span class="nc" id="L273">    {</span>
+<span class="nc" id="L274">        prepareMainMenu();</span>
+<span class="nc" id="L275">    }</span>
+
+    // LISTENERS
+<span class="nc" id="L278">    ActionListener newGameListener = new ActionListener()</span>
+<span class="nc" id="L279">    {</span>
+        @Override
+        public void actionPerformed(ActionEvent e)
+        {
+            // Set main menu invisible and prepare newGameMenu
+<span class="nc" id="L284">            mainPanel.setVisible(false);</span>
+<span class="nc" id="L285">            prepareNewGameMenu();</span>
+<span class="nc" id="L286">            menuFrame.setTitle(&quot;New Game, Who Dis?&quot;);</span>
+<span class="nc" id="L287">        }</span>
+    };
+<span class="nc" id="L289">    ActionListener startGameListener = new ActionListener()</span>
+<span class="nc" id="L290">    {</span>
+        @Override
+        public void actionPerformed(ActionEvent e)
+        {
+            // Stop the button quitting the app
+<span class="nc" id="L295">            menuFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);</span>
+
+<span class="nc" id="L297">            int[] boundingBox = new int[Integer.parseInt(dimensionField.getText())];</span>
+
+<span class="nc" id="L299">            for ( int i = 0;</span>
+<span class="nc bnc" id="L300" title="All 2 branches missed.">                  i &lt; Integer.parseInt(dimensionField.getText());</span>
+<span class="nc" id="L301">                  ++i )</span>
+            {
+<span class="nc" id="L303">                boundingBox[i] = Integer.parseInt(lengthField.getText());</span>
+            }
+
+<span class="nc" id="L306">            Main.startGame( boundingBox, Integer.parseInt(mineField.getText()) );</span>
+<span class="nc" id="L307">            menuFrame.dispatchEvent(new WindowEvent(menuFrame, WindowEvent.WINDOW_CLOSING));</span>
+<span class="nc" id="L308">        }</span>
+    };
+
+<span class="nc" id="L311">    ActionListener quitGameListener = new ActionListener()</span>
+<span class="nc" id="L312">    {</span>
+        @Override
+        public void actionPerformed(ActionEvent e)
+        {
+<span class="nc" id="L316">            Main.quit();</span>
+<span class="nc" id="L317">        }</span>
+    };
+
+<span class="nc" id="L320">    KeyListener checkPositive = new KeyListener()</span>
+<span class="nc" id="L321">    {</span>
+        @Override
+        public void keyTyped(KeyEvent e)
+        {
+<span class="nc" id="L325">        }</span>
+
+        @Override
+        public void keyPressed(KeyEvent e)
+        {
+
+<span class="nc" id="L331">        }</span>
+
+        @Override
+        public void keyReleased(KeyEvent e)
+        {
+
+<span class="nc" id="L337">            Object caller = e.getSource();</span>
+<span class="nc bnc" id="L338" title="All 2 branches missed.">            if ( caller instanceof JTextField )</span>
+            {
+                // If the string is null, don't worry about it
+<span class="nc" id="L341">                String fieldString = ((JTextField) caller).getText();</span>
+<span class="nc bnc" id="L342" title="All 2 branches missed.">                if (fieldString.equals(&quot;&quot;) )</span>
+                {
+<span class="nc" id="L344">                    return;</span>
+                }
+                // Check to see entered text is non-positive. If it is, set it to 1
+                try
+                {
+<span class="nc" id="L349">                    int fieldVal = Integer.parseInt(fieldString);</span>
+<span class="nc bnc" id="L350" title="All 2 branches missed.">                    if (fieldVal &lt;= 0)</span>
+                    {
+<span class="nc" id="L352">                        fieldVal = 1;</span>
+<span class="nc" id="L353">                        ((JTextField) caller).setText(Integer.toString(fieldVal));</span>
+                    }
+                }
+<span class="nc" id="L356">                catch (Exception ex)</span>
+                {
+                    // If something messes up, set to default.
+<span class="nc" id="L359">                    ((JTextField) caller).setText(&quot;1&quot;);</span>
+<span class="nc" id="L360">                }</span>
+            }
+<span class="nc" id="L362">        }</span>
+    };
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

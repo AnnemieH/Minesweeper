@@ -1,0 +1,425 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GUI.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Minesweeper</a> &gt; <a href="index.source.html" class="el_package">org.example</a> &gt; <span class="el_source">GUI.java</span></div><h1>GUI.java</h1><pre class="source lang-java linenums">package org.example;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.util.Arrays;
+
+public class GUI
+{
+<span class="nc" id="L11">    private JFrame frame = new JFrame (&quot;Minesweeper&quot;);</span>
+<span class="nc" id="L12">    private JFrame gameEndFrame = new JFrame(&quot;&quot;);</span>
+    private Board board;
+<span class="fc" id="L14">    private static JLabel minesRemaining = new JLabel(&quot;0&quot;);</span>
+    // Keep track of the slice we're showing
+    private int[] currSlice;
+    private JPanel boardPanel;
+    private JPanel[] slicePanels;
+    private JPanel[] createBoards(Board board)
+    {
+        // Create an array of panels whose length is equal to the product of all but the first two dimensions
+<span class="nc" id="L22">        JPanel[] boardPanels = new JPanel[board.boundingProd()/(board.getBoundingBox()[0] * board.getBoundingBox()[1])];</span>
+<span class="nc" id="L23">        int[] dimensions = Arrays.copyOf(board.getBoundingBox(), board.getBoundingBox().length);</span>
+
+
+        // Create the grid of the same dimensions as the first two dimensions of the board
+        // Set every boardpanel to have this layout
+<span class="nc" id="L28">        for( int k = 0;</span>
+<span class="nc bnc" id="L29" title="All 2 branches missed.">             k &lt; boardPanels.length;</span>
+<span class="nc" id="L30">             ++k )</span>
+        {
+<span class="nc" id="L32">            boardPanels[k] = new JPanel();</span>
+<span class="nc" id="L33">            boardPanels[k].setLayout(new GridLayout(dimensions[0], dimensions[1]));</span>
+
+            // Populate grid with buttons
+<span class="nc" id="L36">            for (int j = 0;</span>
+<span class="nc bnc" id="L37" title="All 2 branches missed.">                 j &lt; dimensions[1];</span>
+<span class="nc" id="L38">                 ++j)</span>
+            {
+<span class="nc" id="L40">                for (int i = 0;</span>
+<span class="nc bnc" id="L41" title="All 2 branches missed.">                     i &lt; dimensions[0];</span>
+<span class="nc" id="L42">                     ++i)</span>
+                {
+                    // Remember to add k * boundingBox[0] * boundingBox[1] to the total index of this tile
+<span class="nc" id="L45">                    int currIndex = k * board.getBoundingBox()[0] * board.getBoundingBox()[1]</span>
+<span class="nc" id="L46">                            + j * board.getBoundingBox()[0] + i;</span>
+                    //Tile currTile = board.getTileAt(new int[]{i, j});
+<span class="nc" id="L48">                    Tile currTile = board.getTileAt(board.indexToCoords(currIndex));</span>
+<span class="nc" id="L49">                    boardPanels[k].add(currTile.tileButton);</span>
+<span class="nc" id="L50">                    boardPanels[k].setVisible(true);</span>
+                }
+            }
+        }
+<span class="nc" id="L54">        return boardPanels;</span>
+    }
+
+    public void endGame(Boolean isWon)
+    {
+<span class="nc" id="L59">        gameEndFrame = new JFrame ();</span>
+<span class="nc" id="L60">        JLabel message = new JLabel();</span>
+        // Check whether the game is won or lost and alter message depending
+<span class="nc bnc" id="L62" title="All 2 branches missed.">        if ( isWon )</span>
+        {
+<span class="nc" id="L64">            gameEndFrame.setTitle(&quot;So fetch&quot;);</span>
+<span class="nc" id="L65">            message.setText(&quot;Lukas will be delivering your victory post-it at 5P.M. ... maybe.&quot;);</span>
+        }
+        else
+        {
+<span class="nc" id="L69">            gameEndFrame.setTitle(&quot;It's okay babes, you tried&quot;);</span>
+<span class="nc" id="L70">            message.setText(&quot;Too bad, so sad.&quot;);</span>
+        }
+
+<span class="nc" id="L73">        gameEndFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);</span>
+<span class="nc" id="L74">        gameEndFrame.setSize(300, 300);</span>
+
+<span class="nc" id="L76">        GridBagLayout endGame = new GridBagLayout();</span>
+<span class="nc" id="L77">        GridBagConstraints endGameConstraints = new GridBagConstraints();</span>
+<span class="nc" id="L78">        gameEndFrame.setLayout(endGame);</span>
+
+<span class="nc" id="L80">        endGameConstraints.fill = GridBagConstraints.HORIZONTAL;</span>
+
+        // Set constraints for message
+<span class="nc" id="L83">        message.setHorizontalAlignment(SwingConstants.CENTER);</span>
+<span class="nc" id="L84">        endGameConstraints.weightx = 0.9;</span>
+<span class="nc" id="L85">        endGameConstraints.gridx = 0;</span>
+<span class="nc" id="L86">        endGameConstraints.gridy = 0;</span>
+<span class="nc" id="L87">        endGameConstraints.gridwidth = 3;</span>
+<span class="nc" id="L88">        endGame.setConstraints(message, endGameConstraints);</span>
+<span class="nc" id="L89">        gameEndFrame.add(message);</span>
+
+<span class="nc" id="L91">        String restartText = &quot;Restart&quot;;</span>
+<span class="nc" id="L92">        JButton restartButton = new JButton(restartText);</span>
+<span class="nc" id="L93">        String quitText = &quot;Quit&quot;;</span>
+<span class="nc" id="L94">        JButton quitButton = new JButton( quitText );</span>
+
+        // Set constraints for restartButton
+<span class="nc" id="L97">        endGameConstraints.weightx = 0.0;</span>
+<span class="nc" id="L98">        endGameConstraints.gridx = 0;</span>
+<span class="nc" id="L99">        endGameConstraints.gridy = 1;</span>
+<span class="nc" id="L100">        endGameConstraints.gridwidth = 1;</span>
+<span class="nc" id="L101">        endGame.setConstraints(restartButton, endGameConstraints);</span>
+<span class="nc" id="L102">        restartButton.setPreferredSize(new Dimension (100, 30 ));</span>
+<span class="nc" id="L103">        gameEndFrame.add(restartButton);</span>
+
+        // Set constraints for quitButton
+<span class="nc" id="L106">        endGameConstraints.weightx = 0.0;</span>
+<span class="nc" id="L107">        endGameConstraints.gridx = 2;</span>
+<span class="nc" id="L108">        endGameConstraints.gridy = 1;</span>
+<span class="nc" id="L109">        endGameConstraints.gridwidth = 1;</span>
+<span class="nc" id="L110">        endGame.setConstraints(quitButton, endGameConstraints);</span>
+<span class="nc" id="L111">        quitButton.setPreferredSize(new Dimension (100, 30 ));</span>
+<span class="nc" id="L112">        gameEndFrame.add(quitButton);</span>
+
+        // Add a box between them as a separator
+<span class="nc" id="L115">        Box spacer = new Box(BoxLayout.X_AXIS);</span>
+<span class="nc" id="L116">        endGameConstraints.weightx = 1.0;</span>
+<span class="nc" id="L117">        endGameConstraints.gridx = 1;</span>
+<span class="nc" id="L118">        endGameConstraints.gridy = 1;</span>
+<span class="nc" id="L119">        endGameConstraints.gridwidth = 1;</span>
+<span class="nc" id="L120">        endGame.setConstraints(spacer, endGameConstraints);</span>
+<span class="nc" id="L121">        gameEndFrame.add(spacer);</span>
+
+        // Add some action listeners to the buttons
+<span class="nc" id="L124">        restartButton.addActionListener(restartListener);</span>
+<span class="nc" id="L125">        quitButton.addActionListener(quitListener);</span>
+
+
+<span class="nc" id="L128">        gameEndFrame.setVisible(true);</span>
+<span class="nc" id="L129">    }</span>
+
+    public static void updateMinesRemaining ( int minesLeft )
+    {
+<span class="fc" id="L133">        minesRemaining.setText(Integer.toString(minesLeft));</span>
+<span class="fc" id="L134">    }</span>
+
+    private int coordsToIndex (int[] coords )
+    {
+        // If coords is empty, return 0
+<span class="nc bnc" id="L139" title="All 2 branches missed.">        if ( coords.length == 0 )</span>
+        {
+<span class="nc" id="L141">            return 0;</span>
+        }
+
+<span class="nc" id="L144">        int[] boundingBox = board.getBoundingBox();</span>
+
+        // If coords[0] is out of bounds, return -1
+<span class="nc bnc" id="L147" title="All 4 branches missed.">        if ( coords[0] &lt; 0 || coords[0] &gt;= boundingBox[0] )</span>
+        {
+<span class="nc" id="L149">            return -1;</span>
+        }
+        // Remove the first element from coords for recursion and store in strippedCoords
+<span class="nc" id="L152">        int[] strippedCoords = new int[coords.length - 1];</span>
+
+<span class="nc bnc" id="L154" title="All 2 branches missed.">        for ( int i : strippedCoords )</span>
+        {
+<span class="nc" id="L156">            strippedCoords[i] = coords[i + 1];</span>
+        }
+
+        // Remove the first element from BoundingBox for recursion
+<span class="nc" id="L160">        int[] strippedBoundingBox = new int[boundingBox.length - 1];</span>
+<span class="nc bnc" id="L161" title="All 2 branches missed.">        for ( int i : strippedBoundingBox )</span>
+        {
+<span class="nc" id="L163">            strippedBoundingBox[i] = boundingBox[i + 1];</span>
+        }
+
+        // Return the appropriate index value, making sure that if it's negative, we set it to -1
+<span class="nc" id="L167">        return Math.max(coords[0] + (boundingBox[0] * coordsToIndex(strippedCoords, strippedBoundingBox)), -1);</span>
+    }
+    private int coordsToIndex(int[] coords, int[] remBoundingBox)
+    {
+        // If coords is empty, return 0
+<span class="nc bnc" id="L172" title="All 2 branches missed.">        if ( coords.length == 0 )</span>
+        {
+<span class="nc" id="L174">            return 0;</span>
+        }
+
+        // If coords[0] is out of bounds, return -1
+<span class="nc bnc" id="L178" title="All 4 branches missed.">        if ( coords[0] &lt; 0 || coords[0] &gt;= remBoundingBox[0] )</span>
+        {
+<span class="nc" id="L180">            return -1;</span>
+        }
+        // Remove the first element from coords for recursion and store in strippedCoords
+<span class="nc" id="L183">        int[] strippedCoords = new int[coords.length - 1];</span>
+
+<span class="nc bnc" id="L185" title="All 2 branches missed.">        for ( int i : strippedCoords )</span>
+        {
+<span class="nc" id="L187">            strippedCoords[i] = coords[i + 1];</span>
+        }
+
+        // Remove the first element from remBoundingBox for recursion
+<span class="nc" id="L191">        int[] strippedBoundingBox = new int[remBoundingBox.length - 1];</span>
+<span class="nc bnc" id="L192" title="All 2 branches missed.">        for ( int i : strippedBoundingBox )</span>
+        {
+<span class="nc" id="L194">            strippedBoundingBox[i] = remBoundingBox[i + 1];</span>
+        }
+
+        // Return the appropriate index value, making sure that if it's negative, we set it to -1
+<span class="nc" id="L198">        return Math.max(coords[0] + (remBoundingBox[0] * coordsToIndex(strippedCoords)), -1);</span>
+    }
+
+    // Change the currently-viewed slice
+    private void updateSlice()
+    {
+/*        // Clear boardPanel
+        boardPanel.removeAll();
+        // Add in current slice to boardPanel
+        boardPanel.add(slicePanels[coordsToIndex(currSlice)]);*/
+<span class="nc" id="L208">        Object currSliceLayout = boardPanel.getLayout();</span>
+
+<span class="nc bnc" id="L210" title="All 2 branches missed.">        if ( currSliceLayout instanceof CardLayout )</span>
+        {
+<span class="nc" id="L212">            ((CardLayout) currSliceLayout).show(boardPanel, Integer.toString(coordsToIndex(currSlice)));</span>
+<span class="nc" id="L213">            boardPanel.setLayout((CardLayout) currSliceLayout);</span>
+
+        }
+<span class="nc" id="L216">    }</span>
+
+    // Add buttons to change the viewed map slice along various dimension axes
+    private JPanel dimensionSelector ()
+    {
+<span class="nc" id="L221">        JPanel dimButtons = new JPanel();</span>
+<span class="nc" id="L222">        GroupLayout dimLayout = new GroupLayout(dimButtons);</span>
+<span class="nc" id="L223">        GroupLayout.SequentialGroup dimPanelSeqGroup = dimLayout.createSequentialGroup();</span>
+<span class="nc" id="L224">        GroupLayout.ParallelGroup dimPanelParGroup = dimLayout.createParallelGroup(GroupLayout.Alignment.CENTER);</span>
+
+        // Instantiäte currSlice
+<span class="nc" id="L227">        currSlice = new int[board.getBoardDimensions() - 2];</span>
+<span class="nc" id="L228">        Arrays.fill(currSlice, 0);</span>
+
+        // For dimensions higher than 2, add selector buttons to the panel
+<span class="nc" id="L231">        for ( int i = 2;</span>
+<span class="nc bnc" id="L232" title="All 2 branches missed.">              i &lt; board.getBoardDimensions();</span>
+<span class="nc" id="L233">              ++i )</span>
+        {
+            // Label the button
+<span class="nc" id="L236">            String labelString = &quot;Z&quot; + (i - 1);</span>
+<span class="nc" id="L237">            JLabel dimLabel = new JLabel(labelString);</span>
+<span class="nc" id="L238">            JButton leftButton = new JButton(&quot;&lt;&quot;);</span>
+<span class="nc" id="L239">            JButton rightButton = new JButton(&quot;&gt;&quot;);</span>
+<span class="nc" id="L240">            JLabel currDimSlice = new JLabel(&quot;0&quot;);</span>
+
+            // Add actionListeners to the buttons
+<span class="nc" id="L243">            leftButton.addActionListener(new ActionListener()</span>
+<span class="nc" id="L244">            {</span>
+                @Override
+                public void actionPerformed(ActionEvent e)
+                {
+                    // Subtract one from the appropriate dimension
+<span class="nc" id="L249">                    int dimNumber = Integer.parseInt(labelString.substring(1));</span>
+<span class="nc" id="L250">                    int newSliceInt = currSlice[dimNumber - 1];</span>
+<span class="nc" id="L251">                    --newSliceInt;</span>
+
+                    // if the new value is less than 0, set it to wrap around
+<span class="nc bnc" id="L254" title="All 2 branches missed.">                    if ( newSliceInt &lt; 0 )</span>
+                    {
+<span class="nc" id="L256">                        newSliceInt += board.getBoundingBox()[dimNumber + 1];</span>
+<span class="nc" id="L257">                        newSliceInt %= board.getBoundingBox()[dimNumber + 1];</span>
+                    }
+
+<span class="nc" id="L260">                    currSlice[dimNumber - 1] = newSliceInt;</span>
+<span class="nc" id="L261">                    currDimSlice.setText(Integer.toString(newSliceInt));</span>
+
+                    // Update the current slice
+<span class="nc" id="L264">                    updateSlice();</span>
+<span class="nc" id="L265">                }</span>
+            });
+<span class="nc" id="L267">            rightButton.addActionListener(new ActionListener()</span>
+<span class="nc" id="L268">            {</span>
+                @Override
+                public void actionPerformed(ActionEvent e)
+                {
+                    // Subtract one from the appropriate dimension
+<span class="nc" id="L273">                    int dimNumber = Integer.parseInt(labelString.substring(1));</span>
+<span class="nc" id="L274">                    int newSliceInt = currSlice[dimNumber - 1];</span>
+<span class="nc" id="L275">                    ++newSliceInt;</span>
+
+                    // if the new value is too big, set it to wrap around
+<span class="nc bnc" id="L278" title="All 2 branches missed.">                    if ( newSliceInt &gt;= board.getBoundingBox()[dimNumber + 1] )</span>
+                    {
+<span class="nc" id="L280">                        newSliceInt %= board.getBoundingBox()[dimNumber + 1];</span>
+                    }
+
+
+<span class="nc" id="L284">                    currSlice[dimNumber - 1] = newSliceInt;</span>
+<span class="nc" id="L285">                    currDimSlice.setText(Integer.toString(newSliceInt));</span>
+
+                    // Update the current slice
+<span class="nc" id="L288">                    updateSlice();</span>
+<span class="nc" id="L289">                }</span>
+            });
+
+            // Align the buttons within themselves
+<span class="nc" id="L293">            GroupLayout.ParallelGroup dimParGroup = dimLayout.createParallelGroup(GroupLayout.Alignment.CENTER);</span>
+<span class="nc" id="L294">            dimParGroup.addComponent(leftButton);</span>
+<span class="nc" id="L295">            dimParGroup.addComponent(currDimSlice);</span>
+<span class="nc" id="L296">            dimParGroup.addComponent(rightButton);</span>
+<span class="nc" id="L297">            GroupLayout.SequentialGroup dimSeqGroup = dimLayout.createSequentialGroup();</span>
+<span class="nc" id="L298">            dimSeqGroup.addComponent(leftButton);</span>
+<span class="nc" id="L299">            dimSeqGroup.addComponent(currDimSlice);</span>
+<span class="nc" id="L300">            dimSeqGroup.addComponent(rightButton);</span>
+
+            // Add buttons and label to panel
+<span class="nc" id="L303">            dimPanelSeqGroup.addComponent(dimLabel);</span>
+<span class="nc" id="L304">            dimPanelSeqGroup.addGroup(dimParGroup);</span>
+<span class="nc" id="L305">            dimPanelParGroup.addComponent(dimLabel);</span>
+<span class="nc" id="L306">            dimPanelParGroup.addGroup(dimSeqGroup);</span>
+
+<span class="nc" id="L308">            dimLayout.setHorizontalGroup(dimPanelParGroup);</span>
+<span class="nc" id="L309">            dimLayout.setVerticalGroup(dimPanelSeqGroup);</span>
+        }
+
+<span class="nc" id="L312">        dimButtons.setLayout(dimLayout);</span>
+
+<span class="nc" id="L314">        return dimButtons;</span>
+    }
+
+
+    // CONSTRUCTORS
+    public GUI(Board board)
+<span class="nc" id="L320">    {</span>
+<span class="nc" id="L321">        this.board = board;</span>
+
+<span class="nc" id="L323">        frame = new JFrame (&quot;Minesweeper&quot;);</span>
+<span class="nc" id="L324">        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);</span>
+<span class="nc" id="L325">        frame.setVisible(true);</span>
+
+        // Add mines remaining label
+<span class="nc" id="L328">        minesRemaining.setPreferredSize(new Dimension (100, 30 ));</span>
+<span class="nc" id="L329">        minesRemaining.setHorizontalAlignment(SwingConstants.CENTER);</span>
+
+        // Create a panel to store the boards
+<span class="nc" id="L332">        slicePanels = createBoards(board);</span>
+<span class="nc" id="L333">        boardPanel = new JPanel();</span>
+        /*GridLayout boardLayout = new GridLayout();
+        boardPanel.setLayout(boardLayout);
+        boardPanel.setVisible(true);
+
+        // Add slices to boardPanel
+        for ( JPanel slice : slicePanels )
+        {
+            boardPanel.add(slice);
+            slice.setVisible(false);
+        }
+
+        // Set the first slice to be visible
+        slicePanels[0].setVisible(true);*/
+
+
+<span class="nc" id="L349">        CardLayout boardLayout = new CardLayout();</span>
+<span class="nc" id="L350">        boardPanel.setLayout(boardLayout);</span>
+
+        // Add each slice of the board to boardPanel
+<span class="nc" id="L353">        for ( int i = 0;</span>
+<span class="nc bnc" id="L354" title="All 2 branches missed.">              i &lt; slicePanels.length;</span>
+<span class="nc" id="L355">              ++i )</span>
+        {
+<span class="nc" id="L357">            String name = Integer.toString(i);</span>
+<span class="nc" id="L358">            slicePanels[i].setName(name);</span>
+<span class="nc" id="L359">            boardPanel.add(slicePanels[i], name);</span>
+<span class="nc" id="L360">            boardLayout.addLayoutComponent(slicePanels[i], name);</span>
+        }
+
+        // Make sure everything is visible
+        /*for ( Component c : boardPanel.getComponents())
+        {
+            c.setVisible(true);
+        }*/
+<span class="nc" id="L368">        boardPanel.setVisible(true);</span>
+
+<span class="nc" id="L370">        JPanel dimPanel = dimensionSelector();</span>
+<span class="nc" id="L371">        JPanel gamePanel = new JPanel();</span>
+
+<span class="nc" id="L373">        GroupLayout gameLayout = new GroupLayout(gamePanel);</span>
+<span class="nc" id="L374">        gameLayout.setHorizontalGroup(gameLayout.createSequentialGroup()</span>
+<span class="nc" id="L375">                                              .addGroup(gameLayout.createParallelGroup(GroupLayout.Alignment.CENTER)</span>
+<span class="nc" id="L376">                                              .addComponent(minesRemaining)</span>
+<span class="nc" id="L377">                                              .addComponent(boardPanel))</span>
+<span class="nc" id="L378">                                              .addComponent(dimPanel)</span>
+                                     );
+<span class="nc" id="L380">        gameLayout.setVerticalGroup(gameLayout.createParallelGroup(GroupLayout.Alignment.CENTER)</span>
+<span class="nc" id="L381">                                            .addGroup(gameLayout.createSequentialGroup()</span>
+<span class="nc" id="L382">                                            .addComponent(minesRemaining)</span>
+<span class="nc" id="L383">                                            .addComponent(boardPanel))</span>
+<span class="nc" id="L384">                                            .addComponent(dimPanel)</span>
+                                   );
+<span class="nc" id="L386">        gamePanel.setLayout(gameLayout);</span>
+<span class="nc" id="L387">        frame.add(gamePanel);</span>
+<span class="nc" id="L388">        frame.setSize(new Dimension(800, 800));</span>
+<span class="nc" id="L389">    }</span>
+
+    // DESTRUCTORS
+    // Close windows
+    public void close()
+    {
+<span class="nc" id="L395">        close(frame);</span>
+<span class="nc" id="L396">        close(gameEndFrame);</span>
+<span class="nc" id="L397">    }</span>
+    public void close(JFrame frameToClose)
+    {
+        // Make sure that window is just closed, this isn't a programme quit
+<span class="nc" id="L401">        frameToClose.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);</span>
+<span class="nc" id="L402">        frameToClose.dispatchEvent(new WindowEvent(frameToClose, WindowEvent.WINDOW_CLOSING));</span>
+<span class="nc" id="L403">    }</span>
+
+
+    // LISTENERS
+<span class="nc" id="L407">    ActionListener restartListener = new ActionListener()</span>
+<span class="nc" id="L408">    {</span>
+        @Override
+        public void actionPerformed(ActionEvent e)
+        {
+<span class="nc" id="L412">            Main.startGame();</span>
+<span class="nc" id="L413">        }</span>
+    };
+
+<span class="nc" id="L416">    ActionListener quitListener = new ActionListener()</span>
+<span class="nc" id="L417">    {</span>
+        @Override
+        public void actionPerformed(ActionEvent e)
+        {
+<span class="nc" id="L421">            Main.quit();</span>
+<span class="nc" id="L422">        }</span>
+    };
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
